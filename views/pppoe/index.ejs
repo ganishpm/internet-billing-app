@@ -1,5 +1,29 @@
 <%- include('../partials/header') %>
 
+<style>
+    /* CSS untuk sorting tetap sama, tidak perlu diubah */
+    .sortable {
+        cursor: pointer;
+        user-select: none;
+        position: relative;
+        padding-right: 20px !important;
+    }
+    .sortable:hover {
+        background-color: #f3f4f6;
+    }
+    .sort-icon {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 0.7em;
+        color: #9ca3af;
+    }
+    .sort-icon.active {
+        color: #3b82f6;
+    }
+</style>
+
 <div class="flex justify-between items-center mb-6">
     <div>
         <h2 class="text-2xl font-bold text-gray-800">Monitoring PPPoE</h2>
@@ -57,14 +81,33 @@
     </div>
     <div class="overflow-x-auto">
         <table class="w-full">
-            <thead class="bg-gray-50 border-b">
+            <thead id="pppoeTableHead" class="bg-gray-50 border-b">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Profile</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Caller-ID</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Uptime</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <!-- PERBAIKAN 1: Ubah <span> menjadi <i> dan tambahkan kelas dasar 'fas fa-sort' -->
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sortable" data-column="name">
+                        Nama
+                        <i class="sort-icon fas fa-sort"></i>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sortable" data-column="profile">
+                        Profile
+                        <i class="sort-icon fas fa-sort"></i>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sortable" data-column="callerId">
+                        Caller-ID
+                        <i class="sort-icon fas fa-sort"></i>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sortable" data-column="address">
+                        Address
+                        <i class="sort-icon fas fa-sort"></i>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sortable" data-column="uptime">
+                        Uptime
+                        <i class="sort-icon fas fa-sort"></i>
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sortable" data-column="status">
+                        Status
+                        <i class="sort-icon fas fa-sort"></i>
+                    </th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                 </tr>
             </thead>
@@ -77,6 +120,8 @@
 
 <script>
 let pppoeData = [];
+let currentSortColumn = 'name';
+let currentSortOrder = 'asc';
 
 // Fungsi untuk menampilkan notifikasi
 function showToast(message, type = 'success') {
@@ -114,10 +159,10 @@ function renderTable(data) {
     data.forEach(user => {
         const row = document.createElement('tr');
         row.className = 'hover:bg-gray-50';
-        
-        const statusBadge = user.active 
+
+        const statusBadge = user.active
             ? '<span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Aktif</span>'
-            : user.disabled 
+            : user.disabled
                 ? '<span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">Disabled</span>'
                 : '<span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Offline</span>';
 
@@ -149,6 +194,85 @@ function updateStats(data) {
     document.getElementById('offlineUsers').textContent = offline;
 }
 
+// Fungsi utama untuk mengurutkan data
+function sortData(column) {
+    if (currentSortColumn === column) {
+        currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
+    } else {
+        currentSortColumn = column;
+        currentSortOrder = 'asc';
+    }
+
+    let sortedData = [...pppoeData];
+
+    sortedData.sort((a, b) => {
+        let valueA, valueB;
+
+        if (column === 'status') {
+            const statusOrder = { 'Aktif': 1, 'Offline': 2, 'Disabled': 3 };
+            const statusA = a.active ? 'Aktif' : (a.disabled ? 'Disabled' : 'Offline');
+            const statusB = b.active ? 'Aktif' : (b.disabled ? 'Disabled' : 'Offline');
+            valueA = statusOrder[statusA];
+            valueB = statusOrder[statusB];
+        } else if (column === 'uptime') {
+            valueA = parseUptimeToSeconds(a.uptime);
+            valueB = parseUptimeToSeconds(b.uptime);
+        } else {
+            valueA = a[column] || '';
+            valueB = b[column] || '';
+            if (typeof valueA === 'string') {
+                return currentSortOrder === 'asc' 
+                    ? valueA.localeCompare(valueB) 
+                    : valueB.localeCompare(valueA);
+            }
+        }
+        
+        if (valueA < valueB) {
+            return currentSortOrder === 'asc' ? -1 : 1;
+        }
+        if (valueA > valueB) {
+            return currentSortOrder === 'asc' ? 1 : -1;
+        }
+        return 0;
+    });
+
+    updateSortIcons();
+    renderTable(sortedData);
+}
+
+// PERBAIKAN 2: Sederhanakan fungsi updateSortIcons untuk menghindari konflik kelas
+function updateSortIcons() {
+    const headers = document.querySelectorAll('#pppoeTableHead th.sortable');
+    headers.forEach(header => {
+        const icon = header.querySelector('.sort-icon');
+        // Reset semua ikon ke keadaan default
+        icon.className = 'sort-icon fas fa-sort';
+
+        if (header.dataset.column === currentSortColumn) {
+            // Jika ini adalah kolom yang aktif, ganti kelasnya
+            const newIconClass = currentSortOrder === 'asc' ? 'fa-sort-up' : 'fa-sort-down';
+            icon.className = `sort-icon fas ${newIconClass} active`;
+        }
+    });
+}
+
+// Fungsi helper untuk mengonversi uptime string ke detik
+function parseUptimeToSeconds(uptimeStr) {
+    if (!uptimeStr || uptimeStr === '0s' || uptimeStr === '-') return 0;
+    let totalSeconds = 0;
+    const days = uptimeStr.match(/(\d+)d/);
+    const hours = uptimeStr.match(/(\d+)h/);
+    const minutes = uptimeStr.match(/(\d+)m/);
+    const seconds = uptimeStr.match(/(\d+)s/);
+
+    if (days) totalSeconds += parseInt(days[1]) * 86400;
+    if (hours) totalSeconds += parseInt(hours[1]) * 3600;
+    if (minutes) totalSeconds += parseInt(minutes[1]) * 60;
+    if (seconds) totalSeconds += parseInt(seconds[1]);
+    
+    return totalSeconds;
+}
+
 // Fungsi untuk mengambil data dari server
 async function fetchPPPoEData() {
     const loadingIndicator = document.getElementById('loadingIndicator');
@@ -157,10 +281,10 @@ async function fetchPPPoEData() {
     try {
         const response = await fetch('/pppoe/data');
         const result = await response.json();
-        
+
         if (result.success) {
             pppoeData = result.data;
-            renderTable(pppoeData);
+            sortData(currentSortColumn);
             updateStats(pppoeData);
         } else {
             showToast(result.message || 'Gagal mengambil data', 'error');
@@ -188,7 +312,7 @@ async function enableUser(name) {
 // Fungsi untuk disable user
 async function disableUser(name) {
     if (!confirm(`Apakah Anda yakin ingin men-disable user ${name}?`)) return;
-    
+
     try {
         const response = await fetch(`/pppoe/disable/${name}`, { method: 'POST' });
         const result = await response.json();
@@ -198,6 +322,15 @@ async function disableUser(name) {
         showToast('Gagal meng-disable user', 'error');
     }
 }
+
+// Event listener untuk klik pada header
+document.getElementById('pppoeTableHead').addEventListener('click', (e) => {
+    const sortableHeader = e.target.closest('.sortable');
+    if (sortableHeader) {
+        const column = sortableHeader.dataset.column;
+        sortData(column);
+    }
+});
 
 // Ambil data saat halaman dimuat
 document.addEventListener('DOMContentLoaded', fetchPPPoEData);
