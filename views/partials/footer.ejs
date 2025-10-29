@@ -1,0 +1,74 @@
+<% if (typeof user !== 'undefined' && user) { %>
+            </main>
+        </div>
+    </div>
+    <% } else { %>
+    </div>
+    <% } %>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // ===================================================================
+        // SIDEBAR TOGGLE (MOBILE)
+        // ===================================================================
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        if (sidebarToggle && sidebar && sidebarOverlay) {
+            function toggleSidebar() {
+                sidebar.classList.toggle('open');
+                sidebarOverlay.classList.toggle('hidden');
+            }
+
+            function closeSidebar() {
+                sidebar.classList.remove('open');
+                sidebarOverlay.classList.add('hidden');
+            }
+
+            // Buka/tutup sidebar saat tombol hamburger diklik
+            sidebarToggle.addEventListener('click', toggleSidebar);
+
+            // Tutup sidebar saat overlay diklik
+            sidebarOverlay.addEventListener('click', closeSidebar);
+
+            // Tutup sidebar saat layar di-resize ke ukuran desktop
+            window.addEventListener('resize', () => {
+                if (window.innerWidth >= 768) {
+                    closeSidebar();
+                }
+            });
+        }
+
+        // ===================================================================
+        // FLASH MESSAGE AUTO-HIDE
+        // ===================================================================
+        const alerts = document.querySelectorAll('.alert');
+        if (alerts.length > 0) {
+            setTimeout(() => {
+                alerts.forEach(alert => {
+                    alert.style.transition = 'opacity 0.5s ease-out';
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 500);
+                });
+            }, 5000);
+        }
+
+        // ===================================================================
+        // CONFIRM DELETE
+        // ===================================================================
+        const deleteButtons = document.querySelectorAll('[data-confirm]');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                const message = button.dataset.confirm;
+                if (!confirm(message)) {
+                    e.preventDefault();
+                }
+            });
+        });
+
+    });
+    </script>
+</body>
+</html>

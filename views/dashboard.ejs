@@ -1,0 +1,288 @@
+<%- include('partials/header') %>
+
+<!-- Flash Messages -->
+<% if (typeof messages !== 'undefined' && messages.success_msg) { %>
+<div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded alert">
+    <div class="flex items-center">
+        <i class="fas fa-check-circle text-green-500 mr-3"></i>
+        <p class="text-green-700"><%= messages.success_msg %></p>
+    </div>
+</div>
+<% } %>
+
+<!-- Statistics Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-500 text-sm">Total Pelanggan</p>
+                <p class="text-3xl font-bold text-gray-800 mt-2"><%= stats.totalCustomers %></p>
+                <p class="text-green-600 text-sm mt-2">
+                    <i class="fas fa-arrow-up mr-1"></i>Aktif
+                </p>
+            </div>
+            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-users text-blue-600"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-500 text-sm">Paket Tersedia</p>
+                <p class="text-3xl font-bold text-gray-800 mt-2"><%= stats.totalPackages %></p>
+                <p class="text-blue-600 text-sm mt-2">
+                    <i class="fas fa-box mr-1"></i>Aktif
+                </p>
+            </div>
+            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-wifi text-purple-600"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-500 text-sm">Tagihan Belum Bayar</p>
+                <p class="text-3xl font-bold text-gray-800 mt-2"><%= stats.unpaidInvoices %></p>
+                <p class="text-orange-600 text-sm mt-2">
+                    <i class="fas fa-clock mr-1"></i>Menunggu
+                </p>
+            </div>
+            <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-file-invoice text-orange-600"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-500 text-sm">Total Pendapatan</p>
+                <p class="text-3xl font-bold text-gray-800 mt-2">Rp <%= stats.totalRevenue.toLocaleString('id-ID') %></p>
+                <p class="text-green-600 text-sm mt-2">
+                    <i class="fas fa-chart-line mr-1"></i>Semua waktu
+                </p>
+            </div>
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-dollar-sign text-green-600"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts and Tables -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <!-- Monthly Revenue Chart -->
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Pendapatan Bulanan</h3>
+        <div class="h-64 flex items-center justify-center">
+            <% if (monthlyRevenue.length > 0) { %>
+            <canvas id="revenueChart"></canvas>
+            <% } else { %>
+            <p class="text-gray-500">Belum ada data pendapatan</p>
+            <% } %>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Aksi Cepat</h3>
+        <div class="grid grid-cols-2 gap-4">
+            <a href="/customers/add" class="bg-blue-50 hover:bg-blue-100 rounded-lg p-4 text-center transition">
+                <i class="fas fa-user-plus text-blue-600 text-2xl mb-2"></i>
+                <p class="text-sm font-medium text-gray-700">Tambah Pelanggan</p>
+            </a>
+            <a href="/invoices/add" class="bg-green-50 hover:bg-green-100 rounded-lg p-4 text-center transition">
+                <i class="fas fa-file-invoice-dollar text-green-600 text-2xl mb-2"></i>
+                <p class="text-sm font-medium text-gray-700">Buat Tagihan</p>
+            </a>
+            <a href="/packages/add" class="bg-purple-50 hover:bg-purple-100 rounded-lg p-4 text-center transition">
+                <i class="fas fa-plus-circle text-purple-600 text-2xl mb-2"></i>
+                <p class="text-sm font-medium text-gray-700">Tambah Paket</p>
+            </a>
+            <a href="/payments" class="bg-orange-50 hover:bg-orange-100 rounded-lg p-4 text-center transition">
+                <i class="fas fa-receipt text-orange-600 text-2xl mb-2"></i>
+                <p class="text-sm font-medium text-gray-700">Lihat Pembayaran</p>
+            </a>
+            <% if (user.role === 'admin') { %>
+                <button onclick="showBroadcastModal()" class="bg-red-50 hover:bg-red-100 rounded-lg p-4 text-center transition col-span-2 md:col-span-1">
+                   <i class="fas fa-bullhorn text-red-600 text-2xl mb-2"></i>
+                   <p class="text-sm font-medium text-gray-700">Broadcast Pengumuman</p>
+                </button>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Invoices and Payments -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Recent Invoices -->
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-800">Tagihan Terbaru</h3>
+            <a href="/invoices" class="text-blue-600 hover:text-blue-700 text-sm">Lihat semua</a>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="text-left text-gray-600 text-sm border-b">
+                        <th class="pb-3">No. Tagihan</th>
+                        <th class="pb-3">Pelanggan</th>
+                        <th class="pb-3">Status</th>
+                        <th class="pb-3">Jumlah</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% recentInvoices.forEach(invoice => { %>
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="py-3 text-sm"><%= invoice.invoiceNumber %></td>
+                        <td class="py-3 text-sm">
+                            <% if (invoice.customer) { %>
+                                <%= invoice.customer.name %>
+                            <% } else { %>
+                                <span class="text-red-600">Pelanggan dihapus</span>
+                            <% } %>
+                        </td>
+                        <td class="py-3">
+                            <% if (invoice.status === 'paid') { %>
+                            <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">Lunas</span>
+                            <% } else if (invoice.status === 'unpaid') { %>
+                            <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700">Belum</span>
+                            <% } else { %>
+                            <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-700">Terlambat</span>
+                            <% } %>
+                        </td>
+                        <td class="py-3 text-sm font-medium">Rp <%= invoice.amount.toLocaleString('id-ID') %></td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+            <% if (recentInvoices.length === 0) { %>
+            <p class="text-gray-500 text-center py-4">Belum ada tagihan</p>
+            <% } %>
+        </div>
+    </div>
+    
+    <!-- Recent Payments -->
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-800">Pembayaran Terbaru</h3>
+            <a href="/payments" class="text-blue-600 hover:text-blue-700 text-sm">Lihat semua</a>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="text-left text-gray-600 text-sm border-b">
+                        <th class="pb-3">Pelanggan</th>
+                        <th class="pb-3">Metode</th>
+                        <th class="pb-3">Tanggal</th>
+                        <th class="pb-3">Jumlah</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% recentPayments.forEach(payment => { %>
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="py-3 text-sm">
+                            <% if (payment.customer) { %>
+                                <%= payment.customer.name %>
+                            <% } else { %>
+                                <span class="text-red-600">Pelanggan dihapus</span>
+                            <% } %>
+                        </td>
+                        <td class="py-3">
+                            <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-700 capitalize">
+                                <%= payment.method %>
+                            </span>
+                        </td>
+                        <td class="py-3 text-sm"><%= moment(payment.paymentDate).format('DD/MM/YYYY') %></td>
+                        <td class="py-3 text-sm font-medium">Rp <%= payment.amount.toLocaleString('id-ID') %></td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+            <% if (recentPayments.length === 0) { %>
+            <p class="text-gray-500 text-center py-4">Belum ada pembayaran</p>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL BROADCAST PENGUMUMAN (VERSII BARU) -->
+<% if (user.role === 'admin') { %>
+<div id="broadcastModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl p-6 w-full max-w-lg mx-4">
+        <h3 class="text-xl font-bold text-gray-800 mb-4">Broadcast Pengumuman</h3>
+
+        <form id="broadcastForm">
+            <!-- Dropdown Pilih Pelanggan -->
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-medium mb-2">Pilih Pelanggan</label>
+                <div class="relative">
+                    <!-- Tombol Trigger Dropdown -->
+                    <button type="button" onclick="toggleDropdown()" id="dropdownButton" class="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 text-left flex justify-between items-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <span id="dropdownButtonText" class="text-gray-500">Pilih pelanggan...</span>
+                        <i class="fas fa-chevron-down text-gray-400"></i>
+                    </button>
+
+                    <!-- Isi Dropdown -->
+                    <div id="dropdownMenu" class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg hidden">
+                        <!-- Input Pencarian -->
+                        <div class="p-2 border-b">
+                            <input type="text" id="customerSearch" placeholder="Cari pelanggan..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500">
+                        </div>
+                        
+                        <!-- Checkbox Pilih Semua -->
+                        <div class="p-2 border-b hover:bg-gray-50">
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="checkbox" id="selectAllCheckbox" class="form-checkbox text-blue-600">
+                                <span class="text-sm font-medium">Pilih Semua</span>
+                            </label>
+                        </div>
+
+                        <!-- Daftar Pelanggan -->
+                        <div class="max-h-48 overflow-y-auto p-2" id="customerList">
+                            <% customers.forEach(customer => { %>
+                                <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded customer-item">
+                                    <input type="checkbox" name="recipientIds" value="<%= customer._id %>" class="form-checkbox text-blue-600 customer-checkbox">
+                                    <span class="text-sm"><%= customer.name %> (<%= customer.phone %>)</span>
+                                </label>
+                            <% }) %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-medium mb-2">Pesan</label>
+                <textarea name="message" rows="4" required
+                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="Masukkan pesan yang ingin dikirim"></textarea>
+            </div>
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="hideBroadcastModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                    Batal
+                </button>
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                    <i class="fas fa-paper-plane mr-2"></i>Kirim
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<% } %>
+
+<%- include('partials/footer') %>
+
+<!-- 1. Pass data dari EJS ke JavaScript -->
+<script>
+    // Buat data dari server tersedia untuk file JS eksternal
+    window.monthlyRevenueData = <%- JSON.stringify(monthlyRevenue) %>;
+</script>
+
+<!-- 2. Load library eksternal -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- 3. Load file JavaScript kita -->
+<script src="/js/dashboard.js"></script>

@@ -1,0 +1,204 @@
+<%- include('../partials/header') %>
+
+<!-- Header Actions -->
+<div class="flex justify-between items-center mb-6">
+   
+    <div class="flex space-x-3 justify-end">
+        <a href="/customers/export" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-lg flex items-center transition">
+            <i class="fas fa-download mr-2"></i>Backup CSV
+        </a>
+        <button onclick="showRestoreModal()" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded-lg flex items-center transition">
+            <i class="fas fa-upload mr-2"></i>Restore
+        </button>
+        <a href="/customers/add" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg flex items-center transition">
+            <i class="fas fa-plus mr-2"></i>Tambah Pelanggan
+        </a>
+    </div>
+</div>
+
+<!-- Search and Filter -->
+<div class="bg-white rounded-xl shadow-md p-4 mb-6">
+    <div class="flex flex-col md:flex-row gap-4">
+        <div class="flex-1">
+            <div class="relative">
+                <input type="text" id="searchInput" placeholder="Cari pelanggan..." 
+                       class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+            </div>
+        </div>
+        <select id="statusFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">Semua Status</option>
+            <option value="active">Aktif</option>
+            <option value="inactive">Tidak Aktif</option>
+            <option value="suspended">Ditangguhkan</option>
+        </select>
+    </div>
+</div>
+
+<!-- Customers Table -->
+<div class="bg-white rounded-xl shadow-md overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-gray-50 border-b">
+                <tr>
+                    <!-- Urutan Baru: Status, Pelanggan, Kontak, Lokasi, Paket, Tanggal, Teknisi, Aksi -->
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <a href="?sortBy=status&sortOrder=<%= currentSort.sortBy === 'status' && currentSort.order === 'desc' ? 'asc' : 'desc' %>" class="hover:text-blue-600">Status <i class="fas fa-sort text-gray-400"></i></a>
+                    </th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <a href="?sortBy=name&sortOrder=<%= currentSort.sortBy === 'name' && currentSort.order === 'desc' ? 'asc' : 'desc' %>" class="hover:text-blue-600">Pelanggan <i class="fas fa-sort text-gray-400"></i></a>
+                    </th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <a href="?sortBy=email&sortOrder=<%= currentSort.sortBy === 'email' && currentSort.order === 'desc' ? 'asc' : 'desc' %>" class="hover:text-blue-600">Kontak <i class="fas fa-sort text-gray-400"></i></a>
+                    </th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <a href="?sortBy=lokasi&sortOrder=<%= currentSort.sortBy === 'lokasi' && currentSort.order === 'desc' ? 'asc' : 'desc' %>" class="hover:text-blue-600">Lokasi <i class="fas fa-sort text-gray-400"></i></a>
+                    </th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <a href="?sortBy=package.name&sortOrder=<%= currentSort.sortBy === 'package.name' && currentSort.order === 'desc' ? 'asc' : 'desc' %>" class="hover:text-blue-600">Paket <i class="fas fa-sort text-gray-400"></i></a>
+                    </th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <a href="?sortBy=installationDate&sortOrder=<%= currentSort.sortBy === 'installationDate' && currentSort.order === 'desc' ? 'asc' : 'desc' %>" class="hover:text-blue-600">Tanggal <i class="fas fa-sort text-gray-400"></i></a>
+                    </th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <a href="?sortBy=teknisiPemasangan&sortOrder=<%= currentSort.sortBy === 'teknisiPemasangan' && currentSort.order === 'desc' ? 'asc' : 'desc' %>" class="hover:text-blue-600">Teknisi <i class="fas fa-sort text-gray-400"></i></a>
+                    </th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200" id="customersTableBody">
+                <% customers.forEach(customer => { %>
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <!-- Urutan Baru: Status, Pelanggan, Kontak, Lokasi, Paket, Tanggal, Teknisi, Aksi -->
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <% if (customer.status === 'active') { %>
+                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                            Aktif
+                        </span>
+                        <% } else if (customer.status === 'inactive') { %>
+                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                            Tidak Aktif
+                        </span>
+                        <% } else { %>
+                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                            Ditangguhkan
+                        </span>
+                        <% } %>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                <i class="fas fa-user text-blue-600"></i>
+                            </div>
+                            <div>
+                                <div class="text-sm font-medium text-gray-900"><%= customer.name %></div>
+                                <div class="text-sm text-gray-500"><%= customer.address %></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900"><%= customer.email %></div>
+                        <div class="text-sm text-gray-500"><%= customer.phone %></div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <%= customer.lokasi %>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900"><%= customer.package.name %></div>
+                        <div class="text-sm text-gray-500"><%= customer.package.speed %></div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <%= moment(customer.installationDate).format('DD MMM YYYY') %>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <%= customer.teknisiPemasangan %>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <a href="/customers/edit/<%= customer._id %>" class="text-blue-600 hover:text-blue-900 mr-3">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <form action="/customers/<%= customer._id %>?_method=DELETE" method="POST" class="inline">
+                            <button type="submit" class="text-red-600 hover:text-red-900" data-confirm="Apakah Anda yakin ingin menghapus pelanggan ini?">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                <% }) %>
+            </tbody>
+        </table>
+        <% if (customers.length === 0) { %>
+        <div class="text-center py-12">
+            <i class="fas fa-users text-gray-300 text-5xl mb-4"></i>
+            <p class="text-gray-500">Belum ada data pelanggan</p>
+            <a href="/customers/add" class="mt-4 inline-block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                Tambah Pelanggan Pertama
+            </a>
+        </div>
+        <% } %>
+    </div>
+</div>
+
+<!-- Restore Modal -->
+<div id="restoreModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl p-6 w-full max-w-md">
+        <h3 class="text-xl font-bold text-gray-800 mb-4">Restore Data Pelanggan</h3>
+        <form action="/customers/restore" method="POST" enctype="multipart/form-data">
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-medium mb-2">Pilih File CSV</label>
+                <input type="file" name="csvFile" accept=".csv" required class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+            </div>
+            <div class="mb-4">
+                <a href="/customers/template" class="text-blue-600 hover:text-blue-700 text-sm">Unduh Template CSV</a>
+            </div>
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="hideRestoreModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                    Batal
+                </button>
+                <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+                    Restore
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>
+
+<script>
+// Search functionality
+document.getElementById('searchInput').addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    const rows = document.querySelectorAll('#customersTableBody tr');
+    
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchTerm) ? '' : 'none';
+    });
+});
+
+// Status filter
+document.getElementById('statusFilter').addEventListener('change', function(e) {
+    const filterValue = e.target.value;
+    const rows = document.querySelectorAll('#customersTableBody tr');
+    
+    rows.forEach(row => {
+        if (filterValue === '') {
+            row.style.display = '';
+        } else {
+            // Perhatikan indeks kolom sekarang berubah. Status ada di kolom pertama (index 0).
+            const statusCell = row.querySelector('td:first-child span');
+            const status = statusCell.textContent.trim().toLowerCase();
+            row.style.display = status === filterValue ? '' : 'none';
+        }
+    });
+});
+
+function showRestoreModal() {
+    document.getElementById('restoreModal').classList.remove('hidden');
+}
+
+function hideRestoreModal() {
+    document.getElementById('restoreModal').classList.add('hidden');
+}
+</script>

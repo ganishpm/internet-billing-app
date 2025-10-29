@@ -1,0 +1,264 @@
+<%- include('../partials/header') %>
+
+<!-- Header Actions -->
+<div class="flex justify-between items-center mb-6">
+    <div class="flex space-x-3 justify-end">
+        <button onclick="showBroadcastModal()" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded-lg flex items-center transition">
+            <i class="fas fa-bullhorn mr-2"></i>Broadcast Pesan
+        </button>
+        <button onclick="showGenerateModal()" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-lg flex items-center transition">
+            <i class="fas fa-file-invoice-dollar mr-2"></i>Generate Bulanan
+        </button>
+        <a href="/invoices/add" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg flex items-center transition">
+            <i class="fas fa-plus mr-2"></i>Buat Tagihan
+        </a>
+    </div>
+</div>
+    
+<!-- Filter Tabs -->
+<div class="bg-white rounded-xl shadow-md p-4 mb-6">
+    <div class="flex flex-wrap gap-2">
+        <button onclick="filterInvoices('all')" class="filter-btn px-4 py-2 rounded-lg bg-blue-100 text-blue-700 font-medium">
+            Semua
+        </button>
+        <button onclick="filterInvoices('unpaid')" class="filter-btn px-4 py-2 rounded-lg hover:bg-gray-100 transition">
+            Belum Bayar
+        </button>
+        <button onclick="filterInvoices('paid')" class="filter-btn px-4 py-2 rounded-lg hover:bg-gray-100 transition">
+            Lunas
+        </button>
+        <button onclick="filterInvoices('overdue')" class="filter-btn px-4 py-2 rounded-lg hover:bg-gray-100 transition">
+            Terlambat
+        </button>
+    </div>
+</div>
+
+<!-- Invoices Table -->
+<div class="bg-white rounded-xl shadow-md overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-gray-50 border-b">
+                <tr>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No. Tagihan</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pelanggan</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paket</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Periode</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jatuh Tempo</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                <% invoices.forEach(invoice => { %>
+                <tr class="hover:bg-gray-50 transition-colors invoice-row" data-status="<%= invoice.status %>">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="text-sm font-medium text-gray-900"><%= invoice.invoiceNumber %></span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <% if (invoice.customer) { %>
+                            <div class="text-sm text-gray-900"><%= invoice.customer.name %></div>
+                            <div class="text-sm text-gray-500"><%= invoice.customer.email %></div>
+                        <% } else { %>
+                            <span class="text-sm text-red-600">Pelanggan tidak ditemukan</span>
+                        <% } %>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <% if (invoice.package) { %>
+                            <div class="text-sm text-gray-900"><%= invoice.package.name %></div>
+                            <div class="text-sm text-gray-500"><%= invoice.package.speed %></div>
+                        <% } else { %>
+                            <span class="text-sm text-red-600">Paket tidak ditemukan</span>
+                        <% } %>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <%= invoice.period %>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900"><%= moment(invoice.dueDate).format('DD MMM YYYY') %></div>
+                        <% if (moment().isAfter(invoice.dueDate) && invoice.status === 'unpaid') { %>
+                        <span class="text-xs text-red-600">Terlambat</span>
+                        <% } %>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        Rp <%= invoice.amount.toLocaleString('id-ID') %>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <% if (invoice.status === 'paid') { %>
+                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                            <i class="fas fa-check-circle mr-1"></i>Lunas
+                        </span>
+                        <% } else if (invoice.status === 'unpaid') { %>
+                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                            <i class="fas fa-clock mr-1"></i>Belum Bayar
+                        </span>
+                        <% } else { %>
+                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                            <i class="fas fa-exclamation-circle mr-1"></i>Terlambat
+                        </span>
+                        <% } %>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+			    <a href="/invoices/view/<%= invoice._id %>" class="text-blue-600 hover:text-blue-900 mr-3" title="Lihat Detail">
+			        <i class="fas fa-eye"></i>
+			    </a>
+			    <% if (invoice.status === 'unpaid') { %>
+			    <a href="/invoices/edit/<%= invoice._id %>" class="text-yellow-600 hover:text-yellow-900 mr-3" title="Edit Tagihan">
+			        <i class="fas fa-edit"></i>
+			    </a>
+			    <form action="/invoices/<%= invoice._id %>?_method=DELETE" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus tagihan ini?');">
+			        <button type="submit" class="text-red-600 hover:text-red-900" title="Hapus Tagihan">
+			            <i class="fas fa-trash"></i>
+			        </button>
+			    </form>
+			    <% } %>
+			</td>
+                </tr>
+                <% }) %>
+            </tbody>
+        </table>
+        <% if (invoices.length === 0) { %>
+        <div class="text-center py-12">
+            <i class="fas fa-file-invoice text-gray-300 text-5xl mb-4"></i>
+            <p class="text-gray-500">Belum ada tagihan</p>
+            <a href="/invoices/add" class="mt-4 inline-block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                Buat Tagihan Pertama
+            </a>
+        </div>
+        <% } %>
+    </div>
+</div>
+
+<!-- Generate Monthly Modal -->
+<div id="generateModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl p-6 w-full max-w-md">
+        <h3 class="text-xl font-bold text-gray-800 mb-4">Generate Tagihan Bulanan</h3>
+        <form action="/invoices/generate-monthly" method="POST">
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2">Bulan</label>
+                    <select name="month" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="01">Januari</option>
+                        <option value="02">Februari</option>
+                        <option value="03">Maret</option>
+                        <option value="04">April</option>
+                        <option value="05">Mei</option>
+                        <option value="06">Juni</option>
+                        <option value="07">Juli</option>
+                        <option value="08">Agustus</option>
+                        <option value="09">September</option>
+                        <option value="10">Oktober</option>
+                        <option value="11">November</option>
+                        <option value="12">Desember</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2">Tahun</label>
+                    <input type="number" name="year" value="<%= moment().year() %>" min="2020" max="2030" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="hideGenerateModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                    Batal
+                </button>
+                <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                    Generate
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Broadcast Modal -->
+<div id="broadcastModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+        <h3 class="text-xl font-bold text-gray-800 mb-4">Broadcast Pengingat Tagihan</h3>
+        <p class="text-sm text-gray-600 mb-6">
+            Ini akan mengirim pesan pengingat otomatis ke semua pelanggan yang memiliki tagihan belum lunas. Pesan akan menggunakan template yang sudah disetel di <a href="/settings/system" class="text-blue-600 hover:underline">Pengaturan Sistem</a>.
+        </p>
+        
+        <!-- Form tidak lagi memiliki input, karena semua sudah otomatis -->
+        <form id="broadcastReminderForm">
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="hideBroadcastModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                    Batal
+                </button>
+                <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
+                    <i class="fas fa-paper-plane mr-2"></i>Kirim Pengingat
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>
+
+<script>
+// Fungsi untuk notifikasi
+function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white z-50 shadow-lg transform transition-all duration-300 ease-in-out translate-x-full ${
+        type === 'success' ? 'bg-green-500' : 'bg-red-500'
+    }`;
+    toast.innerHTML = `<div class="flex items-center"><i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} mr-2"></i>${message}</div>`;
+    
+    document.body.appendChild(toast);
+    setTimeout(() => toast.classList.remove('translate-x-full'), 100);
+    setTimeout(() => { toast.classList.add('translate-x-full'); setTimeout(() => toast.remove(), 300); }, 3000);
+}
+
+// Fungsi untuk modal
+function showBroadcastModal() {
+    document.getElementById('broadcastModal').classList.remove('hidden');
+}
+function hideBroadcastModal() {
+    document.getElementById('broadcastModal').classList.add('hidden');
+}
+
+// ... fungsi filter dan generate modal tetap sama ...
+function filterInvoices(status) { /* ... kode Anda ... */ }
+function showGenerateModal() { /* ... kode Anda ... */ }
+function hideGenerateModal() { /* ... kode Anda ... */ }
+
+// Event Listener untuk submit form broadcast reminder
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('broadcastReminderForm');
+    if (form) {
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Mengirim...';
+
+            try {
+                const response = await fetch('/invoices/broadcast-reminder', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.message || `Server error: ${response.status}`);
+                }
+
+                if (result.success) {
+                    showToast(result.message, 'success');
+                    hideBroadcastModal();
+                } else {
+                    showToast(result.message || 'Terjadi kesalahan yang tidak diketahui.', 'error');
+                }
+            } catch (error) {
+                console.error('Broadcast Error:', error);
+                showToast(error.message || 'Gagal terhubung ke server.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        });
+    }
+});
+</script>

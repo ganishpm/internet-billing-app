@@ -1,0 +1,104 @@
+# ===================================================================
+# .gitignore untuk Aplikasi Internet Billing
+# ===================================================================
+# File ini mencegah file-file tertentu untuk di-track oleh Git.
+# Ini melindungi data rahasia dan menjaga repositori tetap bersih.
+
+# ===================================================================
+# 1. DEPENDENSI (Dependencies)
+# ===================================================================
+# Folder ini berisi semua library yang diunduh dari npm. Sangat besar dan selalu di-generate ulang.
+node_modules/
+
+# Lock file untuk dependency manager. Disarankan untuk di-commit, tapi bisa diabaikan jika diinginkan.
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# ===================================================================
+# 2. VARIABEL LINGKUNGAN (Environment Variables) - PALING PENTING!
+# ===================================================================
+# File ini berisi data SANGAT RAHASIA seperti password database, API key, dll.
+# JANGAN PERNAH mengunggah file ini ke repositori publik!
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ===================================================================
+# 3. BUILD & OUTPUT
+# ===================================================================
+# Folder ini berisi aset yang telah dikompilasi (CSS, JS) untuk produksi.
+dist/
+build/
+.next/
+.nuxt/
+.vuepress/dist/
+
+# ===================================================================
+# 4. LOGS
+# ===================================================================
+# Folder ini berisi file log dari aplikasi dan server.
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# ===================================================================
+# 5. DATABASE BACKUPS
+# ===================================================================
+# Folder ini berisi hasil backup dari database (misalnya dari mongodump).
+mongodb-backup/
+*.bson
+*.json
+
+# ===================================================================
+# 6. RUNTIME DATA
+# ===================================================================
+# File-file yang dibuat oleh runtime aplikasi.
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# ===================================================================
+# 7. COVERAGE DIRECTORY
+# ===================================================================
+# Digunakan oleh tools untuk testing coverage.
+coverage/
+*.lcov
+
+# ===================================================================
+# 8. IDE & EDITOR
+# ===================================================================
+# File konfigurasi dari editor code (user-specific).
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ===================================================================
+# 9. SISTEM OPERASI (OS)
+# ===================================================================
+# File yang dibuat secara otomatis oleh OS.
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.lnk
+
+# ===================================================================
+# 10. FILE SEMENTARA & LAIN-LAIN
+# ===================================================================
+# File sementara dan cache.
+*.tmp
+*.temp
+.cache/
+.parcel-cache/

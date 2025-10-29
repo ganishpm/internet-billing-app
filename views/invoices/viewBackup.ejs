@@ -1,0 +1,222 @@
+<%- include('../partials/header') %>
+
+<div class="max-w-4xl mx-auto">
+    <!-- Invoice Header -->
+    <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+        <div class="flex justify-between items-start mb-6">
+            <div>
+                <h2 class="text-3xl font-bold text-gray-800">Tagihan #<%= invoice.invoiceNumber %></h2>
+                <p class="text-gray-600 mt-1">Dibuat pada <%= moment(invoice.createdAt).format('DD MMMM YYYY') %></p>
+            </div>
+            <div class="text-right">
+                <% if (invoice.status === 'paid') { %>
+                <span class="px-4 py-2 inline-flex text-sm leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                    <i class="fas fa-check-circle mr-2"></i>Lunas
+                </span>
+                <% } else if (invoice.status === 'unpaid') { %>
+                <span class="px-4 py-2 inline-flex text-sm leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                    <i class="fas fa-clock mr-2"></i>Belum Bayar
+                </span>
+                <% } else { %>
+                <span class="px-4 py-2 inline-flex text-sm leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                    <i class="fas fa-exclamation-circle mr-2"></i>Terlambat
+                </span>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Tampilkan catatan jika ada (misalnya untuk tunggakan) -->
+        <% if (invoice.notes) { %>
+        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded">
+            <div class="flex">
+                <i class="fas fa-exclamation-triangle text-yellow-400 mr-3"></i>
+                <p class="text-sm text-yellow-700">
+                    <%= invoice.notes %>
+                </p>
+            </div>
+        </div>
+        <% } %>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <h3 class="text-sm font-medium text-gray-500 mb-2">Informasi Pelanggan</h3>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <% if (invoice.customer) { %>
+                        <p class="font-semibold text-gray-800"><%= invoice.customer.name %></p>
+                        <p class="text-sm text-gray-600 mt-1"><%= invoice.customer.email %></p>
+                        <p class="text-sm text-gray-600"><%= invoice.customer.phone %></p>
+                        <p class="text-sm text-gray-600 mt-2"><%= invoice.customer.address %></p>
+                    <% } else { %>
+                        <p class="font-semibold text-red-600">Data Pelanggan Tidak Ditemukan</p>
+                    <% } %>
+                </div>
+            </div>
+            
+            <div>
+                <h3 class="text-sm font-medium text-gray-500 mb-2">Detail Tagihan</h3>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <div class="flex justify-between mb-2">
+                        <span class="text-sm text-gray-600">Periode:</span>
+                        <span class="text-sm font-medium"><%= invoice.period %></span>
+                    </div>
+                    <div class="flex justify-between mb-2">
+                        <span class="text-sm text-gray-600">Jatuh Tempo:</span>
+                        <span class="text-sm font-medium"><%= moment(invoice.dueDate).format('DD MMM YYYY') %></span>
+                    </div>
+                    <div class="flex justify-between pt-2 border-t">
+                        <span class="font-semibold">Total:</span>
+                        <span class="font-bold text-xl text-blue-600">Rp <%= invoice.amount.toLocaleString('id-ID') %></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Package Details -->
+    <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Detail Paket</h3>
+        <div class="flex items-center justify-between">
+            <% if (invoice.package) { %>
+                <div>
+                    <p class="font-semibold text-gray-800"><%= invoice.package.name %></p>
+                    <p class="text-gray-600"><%= invoice.package.speed %></p>
+                    <% if (invoice.package.description) { %>
+                    <p class="text-sm text-gray-500 mt-1"><%= invoice.package.description %></p>
+                    <% } %>
+                </div>
+                <div class="text-right">
+                    <p class="text-2xl font-bold text-blue-600">Rp <%= invoice.amount.toLocaleString('id-ID') %></p>
+                    <p class="text-sm text-gray-500">/bulan</p>
+                </div>
+            <% } else { %>
+                <p class="font-semibold text-red-600">Data Paket Tidak Ditemukan</p>
+            <% } %>
+        </div>
+    </div>
+    
+    <!-- Payment History -->
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Riwayat Pembayaran</h3>
+        <% if (payments.length > 0) { %>
+        <div class="space-y-3">
+            <% payments.forEach(payment => { %>
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-4">
+                        <i class="fas fa-check text-green-600"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium text-gray-800">Pembayaran Berhasil</p>
+                        <p class="text-sm text-gray-600">
+                            <%= moment(payment.paymentDate).format('DD MMM YYYY, HH:mm') %> • 
+                            Metode: <%= payment.method === 'cash' ? 'Tunai' : payment.method === 'transfer' ? 'Transfer' : 'E-Wallet' %>
+                        </p>
+                        <% if (payment.reference) { %>
+                        <p class="text-sm text-gray-500">Ref: <%= payment.reference %></p>
+                        <% } %>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="font-semibold text-gray-800">Rp <%= payment.amount.toLocaleString('id-ID') %></p>
+                </div>
+            </div>
+            <% }) %>
+        </div>
+        <% } else { %>
+        <div class="text-center py-8">
+            <i class="fas fa-receipt text-gray-300 text-5xl mb-4"></i>
+            <p class="text-gray-500">Belum ada pembayaran</p>
+            <% if (invoice.status === 'unpaid') { %>
+            <a href="/payments/add/<%= invoice._id %>" class="mt-4 inline-block bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+                <i class="fas fa-money-bill-wave mr-2"></i>Catat Pembayaran
+            </a>
+            <% } %>
+        </div>
+        <% } %>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="flex justify-end space-x-4 mt-6">
+        <button onclick="window.print()" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+            <i class="fas fa-print mr-2"></i>Cetak
+        </button>
+        <a href="/invoices" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+            Kembali ke Daftar
+        </a>
+    </div>
+    <div class="flex justify-end space-x-4 mt-6">
+    <button onclick="window.print()" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+        <i class="fas fa-print mr-2"></i>Cetak
+    </button>
+    <button onclick="openMessageModal()" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+        <i class="fas fa-paper-plane mr-2"></i>Kirim Pesan
+    </button>
+</div>
+</div>
+
+<!-- Modal Kirim Pesan -->
+<div id="messageModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl p-6 w-full max-w-md">
+        <h3 class="text-xl font-bold text-gray-800 mb-4">Kirim Pesan</h3>
+        <form action="/send-message" method="POST">
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-medium mb-2">Pilih Penerima</label>
+                <select name="recipientType" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="all">Semua Pelanggan Aktif</option>
+                    <option value="selected">Pelanggan Dipilih</option>
+                </select>
+            </div>
+            <div class="mb-4" id="selectedCustomersSection" style="display: none;">
+                <label class="block text-gray-700 text-sm font-medium mb-2">Pilih Pelanggan</label>
+                <div class="border border-gray-300 rounded-lg p-2 max-h-40 overflow-y-auto">
+                    <% customers.forEach(customer => { %>
+                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                        <input type="checkbox" name="recipientIds" value="<%= customer._id %>" class="form-checkbox text-blue-600">
+                        <span class="text-sm font-medium"><%= customer.name %> (<%= customer.phone %>)</span>
+                    </label>
+                    </label>
+                    <% }) %>
+                </div>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-medium mb-2">Pesan</label>
+                <textarea name="message" rows="4" required
+                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="Masukkan pesan yang ingin dikirim"></textarea>
+            </div>
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="closeMessageModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                    Batal
+                </button>
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                    Kirim
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>
+
+<script>
+function openMessageModal() {
+    const modal = document.getElementById('messageModal');
+    modal.classList.remove('hidden');
+    
+    const recipientType = document.querySelector('select[name="recipientType"]');
+    const selectedSection = document.getElementById('selectedCustomersSection');
+    
+    recipientType.addEventListener('change', function() {
+        if (this.value === 'selected') {
+            selectedSection.style.display = 'block';
+        } else {
+            selectedSection.style.display = 'none';
+        }
+    });
+}
+
+function closeMessageModal() {
+    document.getElementById('messageModal').classList.add('hidden');
+}
+</script>
+<%- include('../partials/footer') %>

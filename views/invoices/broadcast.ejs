@@ -1,0 +1,42 @@
+<div id="broadcastModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl p-6 w-full max-w-md">
+        <h3 class="text-xl font-bold text-gray-800 mb-4">Broadcast Pesan</h3>
+        
+        <form action="/invoices/broadcast" method="POST">
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-medium mb-2">Pilih Pelanggan</label>
+                <div class="border border-gray-300 rounded-lg p-2 max-h-40 overflow-y-auto">
+                    <% customers.forEach(customer => { %>
+                        <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded-lg">
+                            <input type="checkbox" name="recipientIds" value="<%= customer._id %>" class="form-checkbox text-blue-600">
+                                <span class="text-sm font-medium"><%= customer.name %> (<%= customer.phone %></span>
+                            </label>
+                        </label>
+                        <% }) %>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-medium mb-2">Pesan</label>
+                <textarea name="message" rows="4" required
+                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus: outline-none focus: placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="Masukkan pesan yang ingin dikirim"></textarea>
+            </div>
+            
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="hideBroadcastModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                    Batal
+                </button>
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                    <i class="fas fa-paper-plane mr-2"></i>Kirim
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function hideBroadcastModal() {
+        document.getElementById('broadcastModal').classList.add('hidden');
+    }
+</script>

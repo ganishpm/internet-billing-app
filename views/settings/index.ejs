@@ -1,0 +1,66 @@
+<%- include('../partials/header') %>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <a href="/settings/profile" class="bg-white rounded-xl shadow-md p-6 card-hover block">
+        <div class="flex items-center">
+            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                <i class="fas fa-user text-blue-600 text-xl"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold text-gray-800">Profil Saya</h3>
+                <p class="text-sm text-gray-600">Ubah nama dan password</p>
+            </div>
+        </div>
+    </a>
+
+    <% if (user.role === 'admin') { %>
+    <a href="/settings/users" class="bg-white rounded-xl shadow-md p-6 card-hover block">
+        <div class="flex items-center">
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
+                <i class="fas fa-users-cog text-green-600 text-xl"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold text-gray-800">Manajemen User</h3>
+                <p class="text-sm text-gray-600">Tambah, edit, hapus user</p>
+            </div>
+        </div>
+    </a>
+
+    <a href="/settings/system" class="bg-white rounded-xl shadow-md p-6 card-hover block">
+        <div class="flex items-center">
+            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mr-4">
+                <i class="fas fa-server text-purple-600 text-xl"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold text-gray-800">Pengaturan Sistem</h3>
+                <p class="text-sm text-gray-600">Nama provider, tanggal tagihan</p>
+            </div>
+        </div>
+    </a>
+    <a href="/settings/templates" class="bg-white rounded-xl shadow-md p-6 card-hover block">
+        <div class="flex items-center">
+            <div class="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mr-4">
+                <i class="fas fa-envelope-open-text text-teal-600 text-xl"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold text-gray-800">Template Pesan</h3>
+                <p class="text-sm text-gray-600">Atur template WhatsApp</p>
+            </div>
+        </div>
+    </a>
+    <a href="/settings/integrations" class="bg-white rounded-xl shadow-md p-6 card-hover block">
+        <div class="flex items-center">
+            <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mr-4">
+                <i class="fas fa-plug text-orange-600 text-xl"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold text-gray-800">Integrasi API</h3>
+                <p class="text-sm text-gray-600">Mikrotik & WhatsApp</p>
+            </div>
+        </div>
+    </a>
+    
+    <% } %>
+</div>
+
+<%- include('../partials/footer') %>

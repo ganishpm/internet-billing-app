@@ -1,0 +1,160 @@
+/* ===================================================================
+   GLOBAL & UTILITY STYLES
+   =================================================================== */
+
+/* Custom animations */
+@keyframes slideIn {
+    from {
+        transform: translateY(-10px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+.slide-in {
+    animation: slideIn 0.3s ease-out;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Loading spinner */
+.spinner {
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #3498db;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+
+/* ===================================================================
+   MOBILE RESPONSIVE STYLES
+   =================================================================== */
+
+/* Styles for screens smaller than 768px (tablets and phones) */
+@media (max-width: 768px) {
+
+    /* --- General Layout & Typography --- */
+    body {
+        font-size: 14px; /* Sedikit lebih kecil untuk mobile */
+    }
+
+    /* Mengurangi padding pada container di mobile */
+    .max-w-2xl, .max-w-lg, .max-w-xl {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    /* --- Tables --- */
+    /* Mencegah tabel pecah dengan membuatnya bisa di-scroll horizontal */
+    .overflow-x-auto {
+        -webkit-overflow-scrolling: touch; /* Scrolling lebih halus di iOS */
+    }
+    
+    table {
+        font-size: 0.875rem; /* Font lebih kecil di tabel */
+    }
+    
+    table th, table td {
+        padding: 0.75rem 0.5rem; /* Kurangi padding sel */
+        white-space: nowrap; /* Cegah teks wrap agar tetap rapi */
+    }
+
+    /* --- Modals --- */
+    /* Modal mengambil seluruh layar dengan sedikit padding */
+    .fixed.inset-0 {
+        padding: 1rem;
+    }
+    .fixed.inset-0 > div {
+        width: 100% !important;
+        max-width: none !important;
+        height: 100%;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+    }
+    .fixed.inset-0 > div > form {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .fixed.inset-0 > div > form > textarea {
+        flex-grow: 1;
+    }
+
+    /* --- Forms --- */
+    /* Mencegah zoom otomatis saat input fokus di iOS */
+    input[type="text"], input[type="password"], input[type="number"], input[type="email"], input[type="search"], select, textarea {
+        font-size: 16px;
+    }
+
+    /* Tombol di form menjadi full-width dan ditumpuk */
+    .flex.justify-end {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    .flex.justify-end button, .flex.justify-end a {
+        width: 100%;
+        text-align: center;
+    }
+
+    /* --- Cards & Grids --- */
+    /* Grid statistik menjadi 2 kolom di mobile */
+    .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+    }
+    
+    /* Grid 2 kolom menjadi 1 kolom */
+    .grid-cols-2 {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Styles for very small screens (phones in portrait mode) */
+@media (max-width: 480px) {
+    
+    /* --- Cards & Grids --- */
+    /* Grid statistik menjadi 1 kolom di layar sangat kecil */
+    .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-4 {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* ===================================================================
+   PRINT STYLES
+   =================================================================== */
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    body {
+        background: white !important;
+    }
+    .bg-white {
+        box-shadow: none !important;
+    }
+}

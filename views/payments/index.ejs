@@ -1,0 +1,137 @@
+<%- include('../partials/header') %>
+
+<!-- Header -->
+<div class="flex justify-between items-center mb-6">
+    <div>
+        <h2 class="text-2xl font-bold text-gray-800">Riwayat Pembayaran</h2>
+        <p class="text-gray-600 mt-1">Lihat semua transaksi pembayaran</p>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-500 text-sm">Total Pembayaran Hari Ini</p>
+                <p class="text-2xl font-bold text-gray-800 mt-2">
+                    Rp <%= payments.filter(p => moment(p.paymentDate).isSame(moment(), 'day')).reduce((sum, p) => sum + p.amount, 0).toLocaleString('id-ID') %>
+                </p>
+            </div>
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-calendar-day text-green-600"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-500 text-sm">Total Bulan Ini</p>
+                <p class="text-2xl font-bold text-gray-800 mt-2">
+                    Rp <%= payments.filter(p => moment(p.paymentDate).isSame(moment(), 'month')).reduce((sum, p) => sum + p.amount, 0).toLocaleString('id-ID') %>
+                </p>
+            </div>
+            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-calendar-alt text-blue-600"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-500 text-sm">Total Semua</p>
+                <p class="text-2xl font-bold text-gray-800 mt-2">
+                    Rp <%= payments.reduce((sum, p) => sum + p.amount, 0).toLocaleString('id-ID') %>
+                </p>
+            </div>
+            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-coins text-purple-600"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payments Table -->
+<div class="bg-white rounded-xl shadow-md overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-gray-50 border-b">
+                <tr>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID Transaksi</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pelanggan</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tagihan</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Metode</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                <% payments.forEach(payment => { %>
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="text-sm font-medium text-gray-900">#<%= payment._id.toString().slice(-8) %></span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <% if (payment.customer) { %>
+                            <div class="text-sm text-gray-900"><%= payment.customer.name %></div>
+                            <div class="text-sm text-gray-500"><%= payment.customer.email %></div>
+                        <% } else { %>
+                            <div class="text-sm text-red-600">Pelanggan tidak ditemukan</div>
+                        <% } %>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <% if (payment.invoice) { %>
+                            <div class="text-sm text-gray-900"><%= payment.invoice.invoiceNumber %></div>
+                            <div class="text-sm text-gray-500">Periode: <%= payment.invoice.period %></div>
+                        <% } else { %>
+                            <div class="text-sm text-red-600">Tagihan tidak ditemukan</div>
+                        <% } %>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                            <%= payment.method === 'cash' ? 'bg-green-100 text-green-800' : 
+                                payment.method === 'transfer' ? 'bg-blue-100 text-blue-800' : 
+                                'bg-purple-100 text-purple-800' %>">
+                            <%= payment.method === 'cash' ? 'Tunai' : 
+                                payment.method === 'transfer' ? 'Transfer' : 'E-Wallet' %>
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900"><%= moment(payment.paymentDate).format('DD MMM YYYY') %></div>
+                        <div class="text-sm text-gray-500"><%= moment(payment.paymentDate).format('HH:mm') %></div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        Rp <%= payment.amount.toLocaleString('id-ID') %>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <% if (payment.status === 'success') { %>
+                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                            <i class="fas fa-check-circle mr-1"></i>Berhasil
+                        </span>
+                        <% } else if (payment.status === 'pending') { %>
+                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                            <i class="fas fa-clock mr-1"></i>Menunggu
+                        </span>
+                        <% } else { %>
+                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                            <i class="fas fa-times-circle mr-1"></i>Gagal
+                        </span>
+                        <% } %>
+                    </td>
+                </tr>
+                <% }) %>
+            </tbody>
+        </table>
+        <% if (payments.length === 0) { %>
+        <div class="text-center py-12">
+            <i class="fas fa-receipt text-gray-300 text-5xl mb-4"></i>
+            <p class="text-gray-500">Belum ada pembayaran</p>
+        </div>
+        <% } %>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

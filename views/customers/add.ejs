@@ -1,0 +1,167 @@
+<%- include('../partials/header') %>
+
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Tambah Pelanggan Baru</h2>
+        
+        <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded">
+            <div class="flex">
+                <i class="fas fa-exclamation-circle text-red-500 mr-3"></i>
+                <div>
+                    <p class="text-red-700 font-medium">Mohon perbaiki kesalahan berikut:</p>
+                    <ul class="mt-2 text-sm text-red-600">
+                        <% errors.forEach(error => { %>
+                        <li>• <%= error.msg %></li>
+                        <% }) %>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <% } %>
+        
+        <form action="/customers/add" method="POST">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2">Nama Lengkap <span class="text-red-500">*</span></label>
+                    <input type="text" name="name" value="<%= data.name || '' %>" required
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           placeholder="Contoh: Paket Basic">
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2">Email <span class="text-red-500">*</span></label>
+                    <input type="email" name="email" value="<%= data.email || '' %>" required
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           placeholder="email@example.com">
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2">Nomor Telepon <span class="text-red-500">*</span></label>
+                    <input type="tel" name="phone" value="<%= data.phone || '' %>" required
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           placeholder="08123456789">
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2">Alamat Lengkap <span class="text-red-500">*</span></label>
+                    <textarea name="address" rows="3" required
+                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              placeholder="Masukkan alamat lengkap"><%= data.address || '' %></textarea>
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2">Username PPPoE</label>
+                    <div class="relative">
+                        <select id="pppoeUsernameSelect" name="pppoeUsername" required
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white">
+                            <option value="">-- Pilih dari Mikrotik --</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                    </div>
+                    <input type="text" id="pppoePassword" name="pppoePassword" required
+                           class="w-full mt-2 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           placeholder="Password akan terisi otomatis">
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2">Paket Internet <span class="text-red-500">*</span></label>
+                    <select name="package" required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Pilih Paket</option>
+                        <% packages.forEach(pkg => { %>
+                        <option value="<%= pkg._id %>"><%= pkg.name %> - <%= pkg.speed %> (Rp <%= pkg.price.toLocaleString('id-ID') %>/bulan)</option>
+                        <% }) %>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2">Status</label>
+                    <select name="status"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="active">Aktif</option>
+                        <option value="inactive">Tidak Aktif</option>
+                        <option value="suspended">Ditangguhkan</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2">Tanggal Instalasi</label>
+                    <input type="date" name="installationDate" value="<%= moment().format('YYYY-MM-DD') %>"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+            
+            <div class="flex justify-end space-x-4 mt-8">
+                <a href="/customers" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                    Batal
+                </a>
+                <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                    <i class="fas fa-save mr-2"></i>Simpan Pelanggan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>
+
+<script>
+    let pppoeSecrets = [];
+
+    // Fungsi untuk mengambil data secret dari Mikrotik
+    async function fetchPPPoESecrets() {
+        try {
+            const response = await fetch('/pppoe/secrets');
+            const result = await response.json();
+            if (result.success) {
+                pppoeSecrets = result.data;
+                populateDropdown();
+            } else {
+                console.error('Failed to fetch PPPoE secrets:', result.message);
+            }
+        } catch (error) {
+            console.error('Error fetching PPPoE secrets:', error);
+        }
+    }
+
+    // Fungsi untuk mengisi dropdown
+    function populateDropdown() {
+        const select = document.getElementById('pppoeUsernameSelect');
+        const passwordInput = document.getElementById('pppoePassword');
+        
+        // Kosongkan dropdown dan password
+        select.innerHTML = '<option value="">-- Pilih dari Mikrotik --</option>';
+        passwordInput.value = '';
+        
+        // Isi dropdown
+        pppoeSecrets.forEach(secret => {
+            const option = document.createElement('option');
+            option.value = secret.name;
+            option.textContent = secret.name;
+            select.appendChild(option);
+        });
+    }
+
+    // Event listener untuk dropdown
+    document.getElementById('pppoeUsernameSelect').addEventListener('change', function() {
+        const selectedUsername = this.value;
+        const passwordInput = document.getElementById('pppoePassword');
+        
+        if (selectedUsername) {
+            const selectedSecret = pppoeSecrets.find(secret => secret.name === selectedUsername);
+            if (selectedSecret) {
+                passwordInput.value = selectedSecret.password;
+            } else {
+                passwordInput.value = '';
+            }
+        } else {
+            passwordInput.value = '';
+        }
+    });
+
+    // Ambil data saat halaman dimuat
+    document.addEventListener('DOMContentLoaded', fetchPPPoESecrets);
+</script>

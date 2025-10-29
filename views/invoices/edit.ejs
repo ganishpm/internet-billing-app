@@ -1,0 +1,62 @@
+<%- include('../partials/header') %>
+
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Edit Tagihan</h2>
+
+        <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded">
+            <div class="flex">
+                <i class="fas fa-exclamation-circle text-red-500 mr-3"></i>
+                <div>
+                    <p class="text-red-700 font-medium">Mohon perbaiki kesalahan berikut:</p>
+                    <ul class="mt-2 text-sm text-red-600">
+                        <% errors.forEach(error => { %>
+                        <li>• <%= error.msg %></li>
+                        <% }) %>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <% } %>
+
+        <form action="/invoices/edit/<%= invoice._id %>?_method=PUT" method="POST">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="md:col-span-2">
+                    <label class="block text-gray-700 text-sm font-medium mb-2">No. Tagihan</label>
+                    <input type="text" value="<%= invoice.invoiceNumber %>" disabled
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100">
+                </div>
+                
+                <div class="md:col-span-2">
+                    <label class="block text-gray-700 text-sm font-medium mb-2">Pelanggan</label>
+                    <input type="text" value="<%= invoice.customer.name %>" disabled
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100">
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2">Jatuh Tempo <span class="text-red-500">*</span></label>
+                    <input type="date" name="dueDate" value="<%= moment(invoice.dueDate).format('YYYY-MM-DD') %>" required
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2">Jumlah (Rp) <span class="text-red-500">*</span></label>
+                    <input type="number" name="amount" value="<%= invoice.amount %>" required
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+            
+            <div class="flex justify-end space-x-4 mt-8">
+                <a href="/invoices" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                    Batal
+                </a>
+                <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                    <i class="fas fa-save mr-2"></i>Update Tagihan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

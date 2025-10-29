@@ -1,0 +1,84 @@
+<%- include('../partials/header') %>
+
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">Pengaturan Sistem</h2>
+            <a href="/settings" class="text-gray-600 hover:text-gray-800 transition">
+                <i class="fas fa-arrow-left mr-2"></i>Kembali
+            </a>
+        </div>
+
+        <!-- Menampilkan pesan error jika ada -->
+        <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-circle text-red-500"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-red-800">Ada kesalahan dalam formulir:</p>
+                    <div class="mt-2 text-sm text-red-700">
+                        <ul class="list-disc list-inside space-y-1">
+                            <% errors.forEach(error => { %>
+                                <li><%= error.msg %></li>
+                            <% }) %>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <% } %>
+
+        <form action="/settings/system" method="POST">
+            <!-- Nama Provider -->
+            <div class="mb-6">
+                <label for="providerName" class="block text-gray-700 text-sm font-medium mb-2">Nama Provider</label>
+                <input type="text" id="providerName" name="providerName" value="<%= settings.providerName %>" required
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       placeholder="Contoh: Nusantara Internet">
+            </div>
+
+            <!-- Tanggal Tagihan Default -->
+            <div class="mb-6">
+                <label for="defaultInvoiceDay" class="block text-gray-700 text-sm font-medium mb-2">Tanggal Tagihan Default</label>
+                <select id="defaultInvoiceDay" name="defaultInvoiceDay" 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <% for(let i = 1; i <= 31; i++) { %>
+                        <option value="<%= i %>" <%= settings.defaultInvoiceDay === i ? 'selected' : '' %>><%= i %></option>
+                    <% } %>
+                </select>
+                <p class="text-sm text-gray-500 mt-1">Tagihan bulanan akan dibuat otomatis setiap tanggal <strong><%= settings.defaultInvoiceDay || '1' %></strong>.</p>
+            </div>
+
+           <!-- Grace Period untuk Disable Otomatis -->
+           <div class="mb-6">
+                <label for="pppoeDisableGraceDays" class="block text-gray-700 text-sm font-medium mb-2">Masa Tenggang (Hari)</label>
+                <input type="number" id="pppoeDisableGraceDays" name="pppoeDisableGraceDays" 
+                       value="<%= settings.pppoeDisableGraceDays %>" min="0" required
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       placeholder="Contoh: 7">
+                <p class="text-sm text-gray-500 mt-1">Pelanggan akan dinonaktifkan otomatis jika tagihan belum dibayar setelah <strong><%= settings.pppoeDisableGraceDays || '0' %></strong> hari melewati jatuh tempo.</p>
+           </div>
+
+            <!-- Bagian Template Pesan WhatsApp DIHAPUS -->
+            <!-- Jika Anda ingin menambahkan link ke halaman template, tambahkan di sini -->
+            <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <p class="text-sm text-blue-800">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    Untuk mengatur template pesan WhatsApp, silakan kunjungi halaman 
+                    <a href="/settings/templates" class="font-semibold underline hover:text-blue-600">Template Pesan</a>.
+                </p>
+            </div>
+
+            <!-- Tombol Submit -->
+            <div class="flex justify-end">
+                <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                    <i class="fas fa-save mr-2"></i>Simpan Pengaturan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

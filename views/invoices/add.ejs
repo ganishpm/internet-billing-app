@@ -1,0 +1,67 @@
+<%- include('../partials/header') %>
+
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Buat Tagihan Baru</h2>
+        
+        <form action="/invoices/add" method="POST">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="md:col-span-2">
+                    <label class="block text-gray-700 text-sm font-medium mb-2">
+                        Pilih Pelanggan <span class="text-red-500">*</span>
+                    </label>
+                    <select name="customer" required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Pilih Pelanggan</option>
+                        <% customers.forEach(customer => { %>
+                        <option value="<%= customer._id %>">
+                            <%= customer.name %> - <%= customer.package.name %> (Rp <%= customer.package.price.toLocaleString('id-ID') %>/bulan)
+                        </option>
+                        <% }) %>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2">
+                        Bulan <span class="text-red-500">*</span>
+                    </label>
+                    <select name="period" required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Pilih Bulan</option>
+                        <% for(let i = 0; i < 12; i++) { %>
+                        <option value="<%= moment().add(i, 'months').format('MM-YYYY') %>">
+                            <%= moment().add(i, 'months').format('MMMM YYYY') %>
+                        </option>
+                        <% } %>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2">
+                        Tanggal Jatuh Tempo
+                    </label>
+                    <input type="date" name="dueDate" value="<%= moment().add(30, 'days').format('YYYY-MM-DD') %>"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+            
+            <div class="bg-blue-50 rounded-lg p-4 mt-6">
+                <p class="text-sm text-blue-800">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    Tagihan akan otomatis dibuat sesuai dengan harga paket pelanggan yang dipilih
+                </p>
+            </div>
+            
+            <div class="flex justify-end space-x-4 mt-8">
+                <a href="/invoices" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                    Batal
+                </a>
+                <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                    <i class="fas fa-save mr-2"></i>Buat Tagihan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>
