@@ -93,19 +93,28 @@ async function checkAndDisableOverdueUsers() {
     }
 }
 
-// Koneksi ke database
-mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-}).then(() => {
-    console.log('[Scheduler] Connected to MongoDB.');
-    
+/**
+ * Fungsi untuk memulai scheduler.
+ * Fungsi ini akan dipanggil dari file utama aplikasi (app.js/server.js)
+ * setelah koneksi database berhasil.
+ */
+const startScheduler = () => {
+    console.log('[Scheduler] Starting PPPoE overdue user checker...');
+
     // Jalankan setiap hari pada pukul 02:00 pagi
+    // Cron: '0 2 * * *' (menit 0, jam 2, setiap hari, setiap bulan, setiap hari dalam seminggu)
     cron.schedule('0 2 * * *', () => {
+        console.log('[Scheduler] Cron job triggered. Running check for overdue PPPoE users...');
         checkAndDisableOverdueUsers();
+    }, {
+        scheduled: true,
+        timezone: "Asia/Jakarta" // Penting: set zona waktu yang sesuai
     });
-    
-    console.log('[Scheduler] PPPoE checker scheduled to run every day at 02:00.');
-}).catch(err => {
-    console.error('[Scheduler] MongoDB connection error:', err);
-});
+
+    console.log('[Scheduler] PPPoE checker scheduled to run every day at 02:00 (Asia/Jakarta).');
+};
+
+// Export fungsi startScheduler agar bisa dipanggil dari file lain
+module.exports = {
+    startScheduler
+};

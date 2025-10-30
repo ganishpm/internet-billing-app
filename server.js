@@ -12,7 +12,8 @@ const { ensureAdmin } = require('./middleware/admin');
 const Setting = require('./models/Setting');
 const RouterOS = require('node-routeros').RouterOS;
 const axios = require('axios');
-
+const scheduler = require('./scheduler'); 
+const updateRouter = require('./routes/update');
 require('dotenv').config();
 
 const app = express();
@@ -26,9 +27,12 @@ mongoose.connect(process.env.MONGODB_URI, {
     useUnifiedTopology: true
 }).then(() => {
     console.log('MongoDB Connected');
+    scheduler.startScheduler(); //Jalankan scheduler setelah koneksi DB berhasil
 }).catch(err => {
     console.log(err);
 });
+
+
 
 // Middleware
 app.use(express.urlencoded({ extended: true }));
@@ -78,6 +82,7 @@ app.use('/payments', require('./routes/payments'));
 app.use('/settings', require('./routes/settings'));
 app.use('/pppoe', require('./routes/pppoe'));
 app.use('/broadcast', require('./routes/broadcast'));
+app.use('/api', updateRouter);
 // Home Route
 app.get('/', (req, res) => {
     if (req.session.user) {
