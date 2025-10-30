@@ -8,12 +8,12 @@ Aplikasi billing internet full-stack yang dibuat dengan Node.js dan MongoDB.
 - Manajemen Paket Internet
 - Pembuatan Tagihan Otomatis
 - Tracking Pembayaran
-- Dashboard dengan Statistik
-- Modern UI dengan Tailwind CSS
+- Monitoring PPOE
+- WABLAS
 
 ## Instalasi
 
 1. Clone repository
 ```bash
-git clone <repository-url>
+git clone https://github.com/ganishpm/internet-billing-app.git
 cd internet-billing-app
