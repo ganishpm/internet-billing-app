@@ -53,16 +53,20 @@ Jika tidak ingin ganti bisa langsung jalankan
 node scripts/createAdmin.js
 ```
    Jika ingin ganti user admin. edit file dulu
-   1. buka file createAdmin.js
+   1) buka file createAdmin.js
       ```
       nano scripts/createAdmin.js
       ```
-   2. cara baris
+   2) cara baris
       console.log('Username: admin');
       console.log('Password: admin123');
-   3. ganti username dan pasword sesuai keinginan anda
-   4. CTRL + X . klik Y dan enter
-   5. Jalankan createAdmin.js
+   3) ganti username dan pasword sesuai keinginan anda
+   4) CTRL + X . klik Y dan enter
+   5) Jalankan createAdmin.js
       ```
       node scripts/createAdmin.js
       ```
+6. jalankan aplikasi
+```
+npm start
+```
