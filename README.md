@@ -19,4 +19,4 @@ Aplikasi billing internet full-stack yang dibuat dengan Node.js dan MongoDB.
 1. Clone repository
 ```bash
 git clone https://github.com/ganishpm/internet-billing-app.git
-cd internet-billing-app 
+cd internet-billing-app ```bash
