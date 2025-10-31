@@ -20,15 +20,15 @@ Aplikasi billing internet full-stack yang dibuat dengan Node.js dan MongoDB.
  
 1. Clone repository
 ```bash
-git clone https://github.com/ganishpm/internet-billing-app.git
+sudo git clone https://github.com/ganishpm/internet-billing-app.git
 cd internet-billing-app 
 ```
 
 2. Buat file .env
 ```
-nano .env
+sudo nano .env
 ```
-  isi file seperti dibawah ini
+  isi file .env seperti dibawah ini
   ```
   NODE_ENV=production
   PORT=3004
@@ -55,7 +55,7 @@ node scripts/createAdmin.js
    Jika ingin ganti user admin. edit file dulu
    1) buka file createAdmin.js
       ```
-      nano scripts/createAdmin.js
+      sudo nano scripts/createAdmin.js
       ```
    2) cara baris
       console.log('Username: admin');
@@ -64,7 +64,7 @@ node scripts/createAdmin.js
    4) CTRL + X . klik Y dan enter
    5) Jalankan createAdmin.js
       ```
-      node scripts/createAdmin.js
+      sudo node scripts/createAdmin.js
       ```
 6. jalankan aplikasi
 ```
