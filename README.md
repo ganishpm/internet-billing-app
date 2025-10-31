@@ -44,8 +44,8 @@ sudo nano .env
     terutama di lingkungan Node.js dengan framework seperti Express.
 4. Install Dependensi Proyek
 ```
-npm init -y
-npm install axios bcryptjs connect-flash connect-mongo csv-parser csv-writer dotenv ejs express express-session express-validator method-override moment mongoose multer node-cron node-routeros
+sudo npm init -y
+sudo npm install axios bcryptjs connect-flash connect-mongo csv-parser csv-writer dotenv ejs express express-session express-validator method-override moment mongoose multer node-cron node-routeros
 ```
 5.  buat user Admin (bisa diganti sesuai keinginan anda)
 Jika tidak ingin ganti bisa langsung jalankan
