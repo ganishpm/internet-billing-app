@@ -50,7 +50,7 @@ sudo npm install axios bcryptjs connect-flash connect-mongo csv-parser csv-write
 5.  buat user Admin (bisa diganti sesuai keinginan anda)
 Jika tidak ingin ganti bisa langsung jalankan
 ```
-node scripts/createAdmin.js
+sudo node scripts/createAdmin.js
 ```
    Jika ingin ganti user admin. edit file dulu
    1) buka file createAdmin.js
