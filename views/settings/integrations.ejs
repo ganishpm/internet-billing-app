@@ -13,10 +13,10 @@
         <h2 class="text-xl font-bold text-gray-800 mb-4">Integrasi Mikrotik</h2>
         <form id="mikrotikForm" action="/settings/integrations" method="POST">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <input type="text" name="mikrotikHost" id="mikrotikHost" value="<%= settings.mikrotikHost %>" placeholder="Host/IP" class="mikrotik-input px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <input type="text" name="mikrotikPort" id="mikrotikPort" value="<%= settings.mikrotikPort %>" placeholder="Port (Default: 8728)" class="mikrotik-input px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <input type="text" name="mikrotikUser" id="mikrotikUser" value="<%= settings.mikrotikUser %>" placeholder="Username" class="mikrotik-input px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <input type="password" name="mikrotikPass" id="mikrotikPass" value="<%= settings.mikrotikPass %>" placeholder="Password" class="mikrotik-input px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="text" name="mikrotikHost" id="mikrotikHost" value="<%= settings.mikrotikHost %>" placeholder="Host/IP" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="text" name="mikrotikPort" id="mikrotikPort" value="<%= settings.mikrotikPort %>" placeholder="Port (Default: 8728)" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="text" name="mikrotikUser" id="mikrotikUser" value="<%= settings.mikrotikUser %>" placeholder="Username" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="password" name="mikrotikPass" id="mikrotikPass" value="<%= settings.mikrotikPass %>" placeholder="Password" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
             <div class="flex space-x-3">
                 <button type="button" id="testMikrotikBtn" onclick="testMikrotikConnection()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
@@ -27,27 +27,60 @@
         </form>
     </div>
 
-    <!-- WaBlas Section -->
+    <!-- WhatsApp Section (Dengan Dropdown) -->
     <div class="bg-white rounded-xl shadow-md p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">Integrasi WhatsApp (Wablas)</h2>
-        <form id="wablasForm" action="/settings/integrations" method="POST">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Integrasi WhatsApp</h2>
+        <form id="whatsappForm" action="/settings/integrations" method="POST">
+            
+            <!-- Dropdown untuk memilih provider -->
             <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-medium mb-2">API Key</label>
-                <input type="text" name="wablasApiKey" id="wablasApiKey" value="<%= settings.wablasApiKey %>" placeholder="Masukkan API Key" class="wablas-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label class="block text-gray-700 text-sm font-medium mb-2">Pilih Provider WhatsApp</label>
+                <select name="whatsappProvider" id="whatsappProvider" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">-- Pilih Provider --</option>
+                    <option value="wablas" <%= settings.whatsappProvider === 'wablas' ? 'selected' : '' %>>Wablas</option>
+                    <option value="kirimi" <%= settings.whatsappProvider === 'kirimi' ? 'selected' : '' %>>Kirimi.ID</option>
+                </select>
             </div>
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-medium mb-2">Secret Key</label>
-                <input type="text" name="wablasSecretKey" id="wablasSecretKey" value="<%= settings.wablasSecretKey %>" placeholder="Masukkan Secret Key" class="wablas-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+            <!-- Panel Konfigurasi Wablas -->
+            <div id="wablasConfig" class="provider-config p-4 border border-gray-200 rounded-lg" style="display: none;">
+                <h3 class="text-lg font-semibold text-gray-700 mb-3">Konfigurasi Wablas</h3>
+                <div class="mb-4">
+                    <label class="block text-gray-600 text-sm font-medium mb-2">API Key</label>
+                    <input type="text" name="wablasApiKey" id="wablasApiKey" value="<%= settings.wablasApiKey %>" placeholder="Masukkan API Key" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-600 text-sm font-medium mb-2">Secret Key</label>
+                    <input type="text" name="wablasSecretKey" id="wablasSecretKey" value="<%= settings.wablasSecretKey %>" placeholder="Masukkan Secret Key" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-600 text-sm font-medium mb-2">Alamat API URL</label>
+                    <input type="text" name="wablasApiUrl" id="wablasApiUrl" value="<%= settings.wablasApiUrl %>" placeholder="https://console.wablas.com" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
             </div>
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-medium mb-2">Alamat API URL</label>
-                <input type="text" name="wablasApiUrl" id="wablasApiUrl" value="<%= settings.wablasApiUrl %>" placeholder="https://console.wablas.com" class="wablas-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+            <!-- Panel Konfigurasi Kirimi.ID -->
+            <div id="kirimiConfig" class="provider-config p-4 border border-gray-200 rounded-lg" style="display: none;">
+                <h3 class="text-lg font-semibold text-gray-700 mb-3">Konfigurasi Kirimi.ID</h3>
+                <div class="mb-4">
+                    <label class="block text-gray-600 text-sm font-medium mb-2">User Code</label>
+                    <input type="text" name="kirimiUserCode" id="kirimiUserCode" value="<%= settings.kirimiUserCode %>" placeholder="Masukkan User Code" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-600 text-sm font-medium mb-2">Secret Key</label>
+                    <input type="text" name="kirimiSecretKey" id="kirimiSecretKey" value="<%= settings.kirimiSecretKey %>" placeholder="Masukkan Secret Key" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-600 text-sm font-medium mb-2">Device ID</label>
+                    <input type="text" name="kirimiDeviceId" id="kirimiDeviceId" value="<%= settings.kirimiDeviceId %>" placeholder="Masukkan Device ID" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
             </div>
+
             <div class="flex space-x-3">
-                <button type="button" id="testWablasBtn" onclick="testWablasConnection()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
+                <button type="button" id="testWhatsAppBtn" onclick="testWhatsAppConnection()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
                     <i class="fas fa-plug mr-2"></i>Test Koneksi
                 </button>
-                <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">Simpan Wablas</button>
+                <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">Simpan WhatsApp</button>
             </div>
         </form>
     </div>
@@ -62,76 +95,69 @@ function showToast(message, type = 'success') {
     toast.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white z-50 slide-in ${
         type === 'success' ? 'bg-green-500' : 'bg-red-500'
     }`;
-    toast.innerHTML = `
-        <div class="flex items-center">
-            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} mr-2"></i>
-            ${message}
-        </div>
-    `;
-    
+    toast.innerHTML = `<div class="flex items-center"><i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} mr-2"></i>${message}</div>`;
     document.body.appendChild(toast);
-    
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
+    setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
+}
+
+// --- Fungsi untuk menangani perubahan dropdown ---
+function handleProviderChange() {
+    const selectedProvider = document.getElementById('whatsappProvider').value;
+    const configs = document.querySelectorAll('.provider-config');
+    configs.forEach(config => config.style.display = 'none');
+    if (selectedProvider) {
+        const activeConfig = document.getElementById(`${selectedProvider}Config`);
+        if (activeConfig) activeConfig.style.display = 'block';
+    }
+}
+
+// --- Fungsi Test Koneksi WhatsApp (umum untuk kedua provider) ---
+async function testWhatsAppConnection() {
+    const btn = document.getElementById('testWhatsAppBtn');
+    const originalText = btn.innerHTML;
+    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Menguji...';
+
+    const selectedProvider = document.getElementById('whatsappProvider').value;
+    let data = {};
+
+    if (selectedProvider === 'wablas') {
+        data = { provider: 'wablas', apiUrl: document.getElementById('wablasApiUrl').value, apiKey: document.getElementById('wablasApiKey').value };
+    } else if (selectedProvider === 'kirimi') {
+        data = { provider: 'kirimi', userCode: document.getElementById('kirimiUserCode').value, secretKey: document.getElementById('kirimiSecretKey').value };
+    } else {
+        showToast('Silakan pilih provider WhatsApp terlebih dahulu.', 'error');
+        btn.disabled = false; btn.innerHTML = originalText; return;
+    }
+
+    try {
+        const response = await fetch('/settings/test-whatsapp', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
+        });
+        const result = await response.json();
+        showToast(result.message, result.success ? 'success' : 'error');
+    } catch (error) { showToast('Terjadi kesalahan pada koneksi.', 'error'); }
+    finally { btn.disabled = false; btn.innerHTML = originalText; }
 }
 
 // Fungsi Test Koneksi Mikrotik
 async function testMikrotikConnection() {
     const btn = document.getElementById('testMikrotikBtn');
     const originalText = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Menguji...';
-
-    const data = {
-        host: document.getElementById('mikrotikHost').value,
-        port: document.getElementById('mikrotikPort').value,
-        user: document.getElementById('mikrotikUser').value,
-        pass: document.getElementById('mikrotikPass').value,
-    };
-
+    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Menguji...';
+    const data = { host: document.getElementById('mikrotikHost').value, port: document.getElementById('mikrotikPort').value, user: document.getElementById('mikrotikUser').value, pass: document.getElementById('mikrotikPass').value };
     try {
-        const response = await fetch('/settings/test-mikrotik', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
+        const response = await fetch('/settings/test-mikrotik', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
         const result = await response.json();
         showToast(result.message, result.success ? 'success' : 'error');
-    } catch (error) {
-        showToast('Terjadi kesalahan pada koneksi.', 'error');
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = originalText;
-    }
+    } catch (error) { showToast('Terjadi kesalahan pada koneksi.', 'error'); }
+    finally { btn.disabled = false; btn.innerHTML = originalText; }
 }
-// Fungsi Test Koneksi Wablas
-async function testWablasConnection() {
-    const btn = document.getElementById('testWablasBtn');
-    const originalText = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Menguji...';
 
-    const data = {
-        apiUrl: document.getElementById('wablasApiUrl').value,
-        apiKey: document.getElementById('wablasApiKey').value,
-        secretKey: document.getElementById('wablasSecretKey').value, // <-- PASTIKAN BARIS INI ADA
-    };
-
-    try {
-        const response = await fetch('/settings/test-wablas', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-        const result = await response.json();
-        showToast(result.message, result.success ? 'success' : 'error');
-    } catch (error) {
-        showToast('Terjadi kesalahan pada koneksi.', 'error');
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = originalText;
-    }
-}
+// Event Listener untuk menjalankan fungsi saat halaman dimuat
+document.addEventListener('DOMContentLoaded', () => {
+    // Tampilkan panel konfigurasi yang benar saat halaman dimuat
+    handleProviderChange();
+    // Tambahkan event listener ke dropdown
+    document.getElementById('whatsappProvider').addEventListener('change', handleProviderChange);
+});
 </script>

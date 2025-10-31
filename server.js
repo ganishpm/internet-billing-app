@@ -13,7 +13,6 @@ const Setting = require('./models/Setting');
 const RouterOS = require('node-routeros').RouterOS;
 const axios = require('axios');
 const scheduler = require('./scheduler'); 
-const updateRouter = require('./routes/update');
 require('dotenv').config();
 
 const app = express();
@@ -82,7 +81,7 @@ app.use('/payments', require('./routes/payments'));
 app.use('/settings', require('./routes/settings'));
 app.use('/pppoe', require('./routes/pppoe'));
 app.use('/broadcast', require('./routes/broadcast'));
-app.use('/api', updateRouter);
+
 // Home Route
 app.get('/', (req, res) => {
     if (req.session.user) {

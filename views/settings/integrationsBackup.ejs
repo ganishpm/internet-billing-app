@@ -1,0 +1,137 @@
+<%- include('../partials/header') %>
+
+<div class="max-w-2xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">Integrasi API</h2>
+        <a href="/settings" class="text-gray-600 hover:text-gray-800 transition">
+            <i class="fas fa-arrow-left mr-2"></i>Kembali
+        </a>
+    </div>
+
+    <!-- Mikrotik Section -->
+    <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Integrasi Mikrotik</h2>
+        <form id="mikrotikForm" action="/settings/integrations" method="POST">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <input type="text" name="mikrotikHost" id="mikrotikHost" value="<%= settings.mikrotikHost %>" placeholder="Host/IP" class="mikrotik-input px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="text" name="mikrotikPort" id="mikrotikPort" value="<%= settings.mikrotikPort %>" placeholder="Port (Default: 8728)" class="mikrotik-input px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="text" name="mikrotikUser" id="mikrotikUser" value="<%= settings.mikrotikUser %>" placeholder="Username" class="mikrotik-input px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="password" name="mikrotikPass" id="mikrotikPass" value="<%= settings.mikrotikPass %>" placeholder="Password" class="mikrotik-input px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="flex space-x-3">
+                <button type="button" id="testMikrotikBtn" onclick="testMikrotikConnection()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
+                    <i class="fas fa-plug mr-2"></i>Test Koneksi
+                </button>
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Simpan Mikrotik</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- WaBlas Section -->
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Integrasi WhatsApp (Wablas)</h2>
+        <form id="wablasForm" action="/settings/integrations" method="POST">
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-medium mb-2">API Key</label>
+                <input type="text" name="wablasApiKey" id="wablasApiKey" value="<%= settings.wablasApiKey %>" placeholder="Masukkan API Key" class="wablas-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-medium mb-2">Secret Key</label>
+                <input type="text" name="wablasSecretKey" id="wablasSecretKey" value="<%= settings.wablasSecretKey %>" placeholder="Masukkan Secret Key" class="wablas-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-medium mb-2">Alamat API URL</label>
+                <input type="text" name="wablasApiUrl" id="wablasApiUrl" value="<%= settings.wablasApiUrl %>" placeholder="https://console.wablas.com" class="wablas-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="flex space-x-3">
+                <button type="button" id="testWablasBtn" onclick="testWablasConnection()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
+                    <i class="fas fa-plug mr-2"></i>Test Koneksi
+                </button>
+                <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">Simpan Wablas</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>
+
+<script>
+// Fungsi untuk menampilkan notifikasi toast
+function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white z-50 slide-in ${
+        type === 'success' ? 'bg-green-500' : 'bg-red-500'
+    }`;
+    toast.innerHTML = `
+        <div class="flex items-center">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} mr-2"></i>
+            ${message}
+        </div>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// Fungsi Test Koneksi Mikrotik
+async function testMikrotikConnection() {
+    const btn = document.getElementById('testMikrotikBtn');
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Menguji...';
+
+    const data = {
+        host: document.getElementById('mikrotikHost').value,
+        port: document.getElementById('mikrotikPort').value,
+        user: document.getElementById('mikrotikUser').value,
+        pass: document.getElementById('mikrotikPass').value,
+    };
+
+    try {
+        const response = await fetch('/settings/test-mikrotik', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        const result = await response.json();
+        showToast(result.message, result.success ? 'success' : 'error');
+    } catch (error) {
+        showToast('Terjadi kesalahan pada koneksi.', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    }
+}
+// Fungsi Test Koneksi Wablas
+async function testWablasConnection() {
+    const btn = document.getElementById('testWablasBtn');
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Menguji...';
+
+    const data = {
+        apiUrl: document.getElementById('wablasApiUrl').value,
+        apiKey: document.getElementById('wablasApiKey').value,
+        secretKey: document.getElementById('wablasSecretKey').value, // <-- PASTIKAN BARIS INI ADA
+    };
+
+    try {
+        const response = await fetch('/settings/test-wablas', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        const result = await response.json();
+        showToast(result.message, result.success ? 'success' : 'error');
+    } catch (error) {
+        showToast('Terjadi kesalahan pada koneksi.', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    }
+}
+</script>

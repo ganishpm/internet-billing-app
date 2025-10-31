@@ -1,59 +1,73 @@
+// services/messageService.js
 const axios = require('axios');
 const Setting = require('../models/Setting');
 
-/**
- * Mengirim satu pesan WhatsApp.
- * Fungsi ini sekarang menggunakan struktur payload yang benar.
- * @param {string} phoneNumber - Nomor telepon tujuan
- * @param {string} message - Isi pesan
- * @returns {Promise<object>} - Hasil dari API WaBlas
- */
-async function sendWhatsAppMessage(phoneNumber, message) {
-    // Kita bisa memanggil fungsi bulk dengan hanya satu data
-    return sendBulkWhatsAppMessage([{ phone: phoneNumber, message: message }]);
-}
-
-/**
- * Mengirim pesan WhatsApp secara massal (bulk) - FUNGSI UTAMA
- * Ini adalah cara yang paling efisien sesuai contoh API WaBlas.
- * @param {Array} payloads - Array dari objek {phone, message}
- * @returns {Promise<object>} - Hasil dari API WaBlas
- */
-async function sendBulkWhatsAppMessage(payloads) {
+// --- Fungsi untuk WaBlas (tidak berubah) ---
+async function sendWablasMessage(payloads, setting) {
     try {
-        const setting = await Setting.findOne();
-        if (!setting.wablasApiKey || !setting.wablasSecretKey) {
-            throw new Error('API Key atau Secret Key WaBlas tidak dikonfigurasi di pengaturan.');
-        }
-
-        // 1. Gabungkan API Key dan Secret Key
         const token = `${setting.wablasApiKey}.${setting.wablasSecretKey}`;
-
-        // 2. Siapkan payload sesuai format WaBlas
-        const waBlasPayload = {
-            data: payloads // Ini adalah bagian krusialnya
-        };
-
-        // 3. Lakukan permintaan POST ke API WaBlas
+        const waBlasPayload = { data: payloads };
         const response = await axios.post(`${setting.wablasApiUrl}/api/v2/send-message`, waBlasPayload, {
-            headers: {
-                'Authorization': token, // Gunakan token yang sudah digabung
-                'Content-Type': 'application/json'
-            }
+            headers: { 'Authorization': token, 'Content-Type': 'application/json' }
         });
-
+        console.log('[WaBlas Service] Pesan terkirim:', response.data);
         return response.data;
-
     } catch (error) {
-        console.error('[WaBlas Service] Error sending bulk message:', error.response ? error.response.data : error.message);
-        throw error; // Lempar error agar bisa ditangani di controller
+        console.error('[WaBlas Service] Error sending message:', error.response ? error.response.data : error.message);
+        throw new Error('Gagal mengirim pesan via WaBlas.');
     }
 }
 
-// Hapus atau beri komentar pada fungsi lama yang tidak efisien
-// async function broadcastWhatsAppMessage(...) { ... }
+// --- Fungsi untuk Kirimi.ID (SUDAH DIPERBAIKI) ---
+async function sendKirimiMessage(payloads, setting) {
+    try {
+        const results = [];
+        for (const msg of payloads) {
+            // Payload sesuai contoh kode resmi Kirimi.ID
+            const data = {
+                user_code: setting.kirimiUserCode,
+                device_id: setting.kirimiDeviceId,
+                receiver: msg.phone, // Pastikan nomor sudah format internasional (contoh: 62812345678)
+                message: msg.message,
+                secret: setting.kirimiSecretKey
+            };
+
+            const { data: responseData } = await axios.post('https://api.kirimi.id/v1/send-message', data);
+            console.log('[Kirimi.ID Service] Pesan terkirim ke', msg.phone, ':', responseData);
+            results.push(responseData);
+        }
+        return results;
+    } catch (error) {
+        console.error('[Kirimi.ID Service] Error sending message:', error.response ? error.response.data : error.message);
+        throw new Error('Gagal mengirim pesan via Kirimi.ID.');
+    }
+}
+
+// --- Fungsi Utama ---
+async function sendWhatsAppMessage(phoneNumber, message) {
+    return sendBulkWhatsAppMessage([{ phone: phoneNumber, message: message }]);
+}
+
+async function sendBulkWhatsAppMessage(payloads) {
+    const setting = await Setting.findOne();
+    if (!setting || !setting.whatsappProvider) {
+        throw new Error('Provider WhatsApp belum diatur.');
+    }
+
+    if (setting.whatsappProvider === 'wablas') {
+        if (!setting.wablasApiKey) throw new Error('API Key WaBlas tidak dikonfigurasi.');
+        return await sendWablasMessage(payloads, setting);
+    } else if (setting.whatsappProvider === 'kirimi') {
+        if (!setting.kirimiUserCode || !setting.kirimiSecretKey || !setting.kirimiDeviceId) {
+            throw new Error('User Code, Secret Key, atau Device ID Kirimi.ID tidak dikonfigurasi.');
+        }
+        return await sendKirimiMessage(payloads, setting);
+    } else {
+        throw new Error('Provider WhatsApp tidak dikenali.');
+    }
+}
 
 module.exports = {
-    sendWhatsAppMessage,       // Fungsi untuk kirim 1 pesan (sekarang memanggil bulk)
-    sendBulkWhatsAppMessage    // Fungsi utama untuk kirim banyak pesan
+    sendWhatsAppMessage,
+    sendBulkWhatsAppMessage
 };

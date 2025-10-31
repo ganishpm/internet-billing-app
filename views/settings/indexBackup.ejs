@@ -59,8 +59,85 @@
             </div>
         </div>
     </a>
-    
+
+    <!-- =========================================================== -->
+    <!-- =                  TAMBAHAN TOMBOL UPDATE                  = -->
+    <!-- =========================================================== -->
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
+                    <i class="fas fa-sync-alt text-red-600 text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800">Pemeliharaan Aplikasi</h3>
+                    <p class="text-sm text-gray-600">Perbarui kode dari GitHub</p>
+                </div>
+            </div>
+            <button id="updateAppBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center transition text-sm font-medium">
+                <i class="fas fa-download mr-2"></i>Update
+            </button>
+        </div>
+    </div>
+    <!-- =========================================================== -->
+
     <% } %>
 </div>
+
+<!-- =========================================================== -->
+<!-- =                  SCRIPT UNTUK UPDATE                      = -->
+<!-- =========================================================== -->
+<script>
+    // Fungsi untuk menampilkan notifikasi (asumsikan Anda sudah punya, tapi saya sertakan jaga-jaga)
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white z-50 slide-in ${
+            type === 'success' ? 'bg-green-500' : 'bg-red-500'
+        }`;
+        toast.innerHTML = `<div class="flex items-center"><i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} mr-2"></i>${message}</div>`;
+        document.body.appendChild(toast);
+        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
+    }
+
+    // Fungsi untuk memperbarui aplikasi
+    async function updateApplication() {
+        const btn = document.getElementById('updateAppBtn');
+        const originalText = btn.innerHTML;
+
+        // Konfirmasi sebelum menjalankan update
+        if (!confirm('Apakah Anda yakin ingin memperbarui aplikasi dari GitHub? Server akan restart dan halaman akan dimuat ulang.')) {
+            return;
+        }
+
+        // Nonaktifkan tombol dan tampilkan loading
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Mengupdate...';
+
+        try {
+            const response = await fetch('/api/update', { method: 'POST' });
+            const result = await response.json();
+
+            if (result.success) {
+                showToast(result.message, 'success');
+                // Reload halaman setelah 3 detik untuk melihat perubahan
+                setTimeout(() => {
+                    window.location.reload();
+                }, 3000);
+            } else {
+                showToast(result.message, 'error');
+            }
+        } catch (error) {
+            console.error('Update error:', error);
+            showToast('Terjadi kesalahan koneksi saat mencoba mengupdate.', 'error');
+        } finally {
+            // Kembalikan tombol ke keadaan semula
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    }
+
+    // Tambahkan event listener ke tombol
+    document.getElementById('updateAppBtn').addEventListener('click', updateApplication);
+</script>
 
 <%- include('../partials/footer') %>
