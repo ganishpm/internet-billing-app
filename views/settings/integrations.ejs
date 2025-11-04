@@ -39,9 +39,17 @@
                     <option value="">-- Pilih Provider --</option>
                     <option value="wablas" <%= settings.whatsappProvider === 'wablas' ? 'selected' : '' %>>Wablas</option>
                     <option value="kirimi" <%= settings.whatsappProvider === 'kirimi' ? 'selected' : '' %>>Kirimi.ID</option>
+                    <option value="weagate" <%= settings.whatsappProvider === 'weagate' ? 'selected' : '' %>>WeaGate</option>
                 </select>
             </div>
-
+            
+            <div id="weagateConfig" class="provider-config p-4 border border-gray-200 rounded-lg" style="display: none;">
+		    <h3 class="text-lg font-semibold text-gray-700 mb-3">Konfigurasi WeaGate</h3>
+		    <div class="mb-4">
+		        <label class="block text-gray-600 text-sm font-medium mb-2">Device Token</label>
+		        <input type="text" name="weagateToken" id="weagateToken" value="<%= settings.weagateToken %>" placeholder="Masukkan Device Token dari WeaGate" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+		    </div>
+	    </div>
             <!-- Panel Konfigurasi Wablas -->
             <div id="wablasConfig" class="provider-config p-4 border border-gray-200 rounded-lg" style="display: none;">
                 <h3 class="text-lg font-semibold text-gray-700 mb-3">Konfigurasi Wablas</h3>
@@ -75,6 +83,25 @@
                     <input type="text" name="kirimiDeviceId" id="kirimiDeviceId" value="<%= settings.kirimiDeviceId %>" placeholder="Masukkan Device ID" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
             </div>
+
+            <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+		    <h3 class="text-lg font-semibold text-gray-700 mb-3">Pengaturan Broadcast</h3>
+		    <p class="text-sm text-gray-600 mb-4">Atur limit dan jeda waktu untuk pengiriman pesan broadcast agar tidak terkena spam.</p>
+		    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+		        <div>
+		            <label for="limitPesan" class="block text-gray-600 text-sm font-medium mb-2">Limit Pesan per Broadcast</label>
+		            <input type="number" id="limitPesan" name="limitPesan" value="<%= settings.limitPesan %>" 
+		                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+		                   placeholder="Contoh: 10" min="1">
+		        </div>
+		        <div>
+		            <label for="jedaWaktu" class="block text-gray-600 text-sm font-medium mb-2">Jeda Waktu (detik)</label>
+		            <input type="number" id="jedaWaktu" name="jedaWaktu" value="<%= settings.jedaWaktu %>" 
+		                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+		                   placeholder="Contoh: 60" min="1">
+		        </div>
+		    </div>
+	    </div>
 
             <div class="flex space-x-3">
                 <button type="button" id="testWhatsAppBtn" onclick="testWhatsAppConnection()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
@@ -111,11 +138,12 @@ function handleProviderChange() {
     }
 }
 
-// --- Fungsi Test Koneksi WhatsApp (umum untuk kedua provider) ---
+// --- Fungsi Test Koneksi WhatsApp ---
 async function testWhatsAppConnection() {
     const btn = document.getElementById('testWhatsAppBtn');
     const originalText = btn.innerHTML;
-    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Menguji...';
+    btn.disabled = true; 
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Menguji...';
 
     const selectedProvider = document.getElementById('whatsappProvider').value;
     let data = {};
@@ -124,20 +152,32 @@ async function testWhatsAppConnection() {
         data = { provider: 'wablas', apiUrl: document.getElementById('wablasApiUrl').value, apiKey: document.getElementById('wablasApiKey').value };
     } else if (selectedProvider === 'kirimi') {
         data = { provider: 'kirimi', userCode: document.getElementById('kirimiUserCode').value, secretKey: document.getElementById('kirimiSecretKey').value };
+    } else if (selectedProvider === 'weagate') { // TAMBAHKAN BLOK INI
+        data = { provider: 'weagate', token: document.getElementById('weagateToken').value };
     } else {
         showToast('Silakan pilih provider WhatsApp terlebih dahulu.', 'error');
-        btn.disabled = false; btn.innerHTML = originalText; return;
+        btn.disabled = false; 
+        btn.innerHTML = originalText; 
+        return;
     }
 
     try {
         const response = await fetch('/settings/test-whatsapp', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' }, 
+            body: JSON.stringify(data)
         });
         const result = await response.json();
         showToast(result.message, result.success ? 'success' : 'error');
-    } catch (error) { showToast('Terjadi kesalahan pada koneksi.', 'error'); }
-    finally { btn.disabled = false; btn.innerHTML = originalText; }
+    } catch (error) { 
+        showToast('Terjadi kesalahan pada koneksi.', 'error'); 
+    }
+    finally { 
+        btn.disabled = false; 
+        btn.innerHTML = originalText; 
+    }
 }
+
 
 // Fungsi Test Koneksi Mikrotik
 async function testMikrotikConnection() {

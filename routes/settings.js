@@ -7,6 +7,7 @@ const { ensureAdmin } = require('../middleware/admin');
 const User = require('../models/User');
 const Setting = require('../models/Setting');
 const { body, validationResult } = require('express-validator');
+const messageService = require('../services/messageService');
 
 // Helper untuk mendapatkan atau membuat setting pertama kali
 const getSettings = async () => {
@@ -159,7 +160,7 @@ router.post('/integrations', ensureAuth, ensureAdmin, async (req, res) => {
 
 /**
  * @route   POST /settings/test-whatsapp
- * @desc    Menjalankan test koneksi ke WaBlas atau Kirimi.ID
+ * @desc    Menjalankan test koneksi ke WaBlas, Kirimi.ID, atau WeaGate
  * @access  Private (Admin)
  */
 router.post('/test-whatsapp', ensureAuth, ensureAdmin, async (req, res) => {
@@ -180,7 +181,7 @@ router.post('/test-whatsapp', ensureAuth, ensureAdmin, async (req, res) => {
             if (!userCode || !secretKey) {
                 return res.status(400).json({ success: false, message: 'User Code dan Secret Key wajib diisi untuk test koneksi.' });
             }
-            
+
             const response = await axios.post('https://api.kirimi.id/v1/user-info', {
                 user_code: userCode,
                 secret: secretKey
@@ -194,16 +195,23 @@ router.post('/test-whatsapp', ensureAuth, ensureAdmin, async (req, res) => {
                 res.json({ success: false, message: `Koneksi gagal: ${response.data.message || 'User Code atau Secret Key tidak valid.'}` });
             }
 
+        } else if (provider === 'weagate') { // <-- TAMBAHKAN BLOK INI
+            const { token } = data;
+            // Panggil fungsi test dari messageService yang telah kita buat
+            const result = await messageService.testWeagateConnection(token);
+            return res.json(result);
+
         } else {
             res.json({ success: false, message: 'Provider tidak valid.' });
         }
     } catch (error) {
         console.error('[Test WhatsApp Error]', error.response ? error.response.data : error.message);
-        
+
         // Tangani error spesifik dari Kirimi.ID
         if (error.response && error.response.status === 401) {
             res.status(401).json({ success: false, message: 'Koneksi gagal: User Code atau Secret Key tidak valid.' });
         } else {
+            // Error umum untuk provider lain atau masalah jaringan
             res.status(500).json({ success: false, message: 'Gagal menguji koneksi. Periksa kembali data Anda.' });
         }
     }

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { ensureAuth } = require('../middleware/auth');
+const { ensureAdmin } = require('../middleware/admin');
 const bcrypt = require('bcryptjs');
 const Customer = require('../models/Customer');
 const Package = require('../models/Package');
@@ -393,5 +394,50 @@ router.get('/template', ensureAuth, (req, res) => {
 
 // --- AKHIR TAMBAHAN BACKUP/RESTORE ---
 
+/**
+ * @route   POST /customers/bulk-delete
+ * @desc    Menghapus beberapa pelanggan sekaligus
+ * @access  Private (Admin)
+ */
+router.post('/bulk-delete', ensureAuth, ensureAdmin, async (req, res) => {
+    try {
+        const { ids } = req.body;
+
+        if (!ids || !Array.isArray(ids) || ids.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Tidak ada pelanggan yang dipilih untuk dihapus.'
+            });
+        }
+
+        // Tambahkan logika untuk memeriksa apakah pelanggan memiliki tagihan yang belum lunas
+        const Invoice = require('../models/Invoice'); // Pastikan path ke model Invoice benar
+        const customersWithUnpaidInvoices = await Invoice.find({ 
+            customer: { $in: ids }, 
+            status: 'unpaid' 
+        }).distinct('customer');
+
+        if (customersWithUnpaidInvoices.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Tidak dapat menghapus pelanggan yang memiliki tagihan belum lunas.'
+            });
+        }
+
+        const result = await Customer.deleteMany({ _id: { $in: ids } });
+
+        res.status(200).json({
+            success: true,
+            message: `Berhasil menghapus ${result.deletedCount} pelanggan.`
+        });
+
+    } catch (error) {
+        console.error('Bulk Delete Customers Error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Terjadi kesalahan pada server saat menghapus pelanggan.'
+        });
+    }
+});
 
 module.exports = router;

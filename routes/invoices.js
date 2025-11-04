@@ -282,6 +282,57 @@ router.delete('/:id', ensureAuth, async (req, res) => {
     }
 });
 
+// ===================================================================
+//                      B U L K  D E L E T E
+// ===================================================================
+
+/**
+ * @route   POST /invoices/bulk-delete
+ * @desc    Menghapus beberapa tagihan sekaligus
+ * @access  Private (Admin) - Dibatasi untuk admin karena ini tindakan berisiko tinggi
+ */
+router.post('/bulk-delete', ensureAuth, ensureAdmin, async (req, res) => {
+    try {
+        // 1. Ambil array ID dari request body
+        const { ids } = req.body;
+
+        // 2. Validasi input
+        if (!ids || !Array.isArray(ids) || ids.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Tidak ada tagihan yang dipilih untuk dihapus.'
+            });
+        }
+
+        // 3. Cari tagihan yang akan dihapus untuk validasi tambahan (opsional, tapi direkomendasikan)
+        const invoicesToDelete = await Invoice.find({ _id: { $in: ids } });
+        const paidInvoices = invoicesToDelete.filter(inv => inv.status === 'paid');
+        if (paidInvoices.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Tidak dapat menghapus tagihan yang sudah lunas.'
+            });
+        }
+        
+        // 4. Hapus semua tagihan yang ID-nya ada di dalam array `ids`
+        const result = await Invoice.deleteMany({ _id: { $in: ids }, status: { $ne: 'paid' } });
+
+        // 5. Kirim response sukses dalam format JSON
+        res.status(200).json({
+            success: true,
+            message: `Berhasil menghapus ${result.deletedCount} tagihan.`
+        });
+
+    } catch (error) {
+        console.error('Bulk Delete Error:', error);
+        // 6. Tangani jika terjadi error
+        res.status(500).json({
+            success: false,
+            message: 'Terjadi kesalahan pada server saat menghapus tagihan.'
+        });
+    }
+});
+
 
 // ===================================================================
 // B R O A D C A S T  &  N O T I F I K A S I

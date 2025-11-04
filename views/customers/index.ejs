@@ -1,30 +1,37 @@
 <%- include('../partials/header') %>
 
 <!-- Header Actions -->
-<div class="flex justify-between items-center mb-6">
-   
-    <div class="flex space-x-3 justify-end">
-        <a href="/customers/export" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-lg flex items-center transition">
+<div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
+    <div>
+        <h2 class="text-2xl font-bold text-gray-800">Daftar Pelanggan</h2>
+        <p class="text-gray-600 mt-1">Kelola data pelanggan Anda</p>
+    </div>
+    <!-- PERUBAHAN: Menambahkan kelas flex-wrap dan gap responsif -->
+    <div class="flex flex-wrap gap-2 sm:gap-3 sm:justify-end">
+        <a href="/customers/export" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-lg flex items-center transition text-sm">
             <i class="fas fa-download mr-2"></i>Backup CSV
         </a>
-        <button onclick="showRestoreModal()" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded-lg flex items-center transition">
+        <button onclick="showRestoreModal()" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded-lg flex items-center transition text-sm">
             <i class="fas fa-upload mr-2"></i>Restore
         </button>
-        <a href="/customers/add" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg flex items-center transition">
+        <a href="/customers/add" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg flex items-center transition text-sm">
             <i class="fas fa-plus mr-2"></i>Tambah Pelanggan
         </a>
     </div>
 </div>
-
 <!-- Search and Filter -->
 <div class="bg-white rounded-xl shadow-md p-4 mb-6">
     <div class="flex flex-col md:flex-row gap-4">
-        <div class="flex-1">
-            <div class="relative">
+        <!-- PERUBAHAN 1: Menambahkan Tombol Cari -->
+        <div class="flex-1 flex gap-2">
+            <div class="relative flex-1">
                 <input type="text" id="searchInput" placeholder="Cari pelanggan..." 
                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
             </div>
+            <button id="searchButton" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition">
+                Cari
+            </button>
         </div>
         <select id="statusFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
             <option value="">Semua Status</option>
@@ -41,6 +48,10 @@
         <table class="w-full">
             <thead class="bg-gray-50 border-b">
                 <tr>
+                    <!-- Kolom Checkbox -->
+                    <th class="px-6 py-4 text-left">
+                        <input type="checkbox" id="selectAll" class="rounded text-blue-600 focus:ring-blue-500">
+                    </th>
                     <!-- Urutan Baru: Status, Pelanggan, Kontak, Lokasi, Paket, Tanggal, Teknisi, Aksi -->
                     <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         <a href="?sortBy=status&sortOrder=<%= currentSort.sortBy === 'status' && currentSort.order === 'desc' ? 'asc' : 'desc' %>" class="hover:text-blue-600">Status <i class="fas fa-sort text-gray-400"></i></a>
@@ -69,6 +80,10 @@
             <tbody class="bg-white divide-y divide-gray-200" id="customersTableBody">
                 <% customers.forEach(customer => { %>
                 <tr class="hover:bg-gray-50 transition-colors">
+                    <!-- Checkbox untuk setiap baris -->
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <input type="checkbox" class="customer-checkbox rounded text-blue-600 focus:ring-blue-500" data-id="<%= customer._id %>">
+                    </td>
                     <!-- Urutan Baru: Status, Pelanggan, Kontak, Lokasi, Paket, Tanggal, Teknisi, Aksi -->
                     <td class="px-6 py-4 whitespace-nowrap">
                         <% if (customer.status === 'active') { %>
@@ -139,6 +154,13 @@
     </div>
 </div>
 
+<!-- Delete Selected Button -->
+<div class="mt-4 flex justify-end">
+    <button id="deleteSelected" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center transition disabled:bg-gray-400 disabled:cursor-not-allowed" disabled>
+        <i class="fas fa-trash mr-2"></i>Hapus yang Dipilih
+    </button>
+</div>
+
 <!-- Restore Modal -->
 <div id="restoreModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
     <div class="bg-white rounded-xl p-6 w-full max-w-md">
@@ -163,37 +185,146 @@
     </div>
 </div>
 
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+        <h3 class="text-xl font-bold text-gray-800 mb-4">Konfirmasi Hapus</h3>
+        <p class="text-gray-600 mb-6">Apakah Anda yakin ingin menghapus <span id="deleteCount">0</span> pelanggan yang dipilih? Tindakan ini tidak dapat dibatalkan.</p>
+        <div class="flex justify-end space-x-3">
+            <button type="button" onclick="hideDeleteModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                Batal
+            </button>
+            <button type="button" id="confirmDelete" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                Hapus
+            </button>
+        </div>
+    </div>
+</div>
+
 <%- include('../partials/footer') %>
 
 <script>
-// Search functionality
-document.getElementById('searchInput').addEventListener('input', function(e) {
-    const searchTerm = e.target.value.toLowerCase();
-    const rows = document.querySelectorAll('#customersTableBody tr');
-    
-    rows.forEach(row => {
-        const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(searchTerm) ? '' : 'none';
+// Fungsi untuk notifikasi
+function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white z-50 shadow-lg transform transition-all duration-300 ease-in-out translate-x-full ${
+        type === 'success' ? 'bg-green-500' : 'bg-red-500'
+    }`;
+    toast.innerHTML = `<div class="flex items-center"><i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} mr-2"></i>${message}</div>`;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.classList.remove('translate-x-full'), 100);
+    setTimeout(() => { toast.classList.add('translate-x-full'); setTimeout(() => toast.remove(), 300); }, 3000);
+}
+
+// ===================================================================
+// FUNGSI SEARCH & FILTER
+// ===================================================================
+document.addEventListener('DOMContentLoaded', function() {
+    // PERUBAHAN 2: Memisahkan logika pencarian ke dalam fungsi
+    function performSearch() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const rows = document.querySelectorAll('#customersTableBody tr');
+        
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+    }
+
+    // PERUBAHAN 3: Event listener untuk tombol "Cari"
+    const searchButton = document.getElementById('searchButton');
+    if (searchButton) {
+        searchButton.addEventListener('click', performSearch);
+    }
+
+    // PERUBAHAN 4: Event listener untuk menekan "Enter" di input pencarian
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault(); // Mencegah submit form jika ada
+                performSearch();
+            }
+        });
+    }
+
+    // Status filter (tidak berubah)
+    document.getElementById('statusFilter').addEventListener('change', function(e) {
+        const filterValue = e.target.value;
+        const rows = document.querySelectorAll('#customersTableBody tr');
+        
+        rows.forEach(row => {
+            if (filterValue === '') {
+                row.style.display = '';
+            } else {
+                const statusCell = row.querySelector('td:nth-child(2) span');
+                if (statusCell) {
+                    const status = statusCell.textContent.trim().toLowerCase();
+                    row.style.display = status === filterValue ? '' : 'none';
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+        });
     });
 });
 
-// Status filter
-document.getElementById('statusFilter').addEventListener('change', function(e) {
-    const filterValue = e.target.value;
-    const rows = document.querySelectorAll('#customersTableBody tr');
+// ===================================================================
+// FUNGSI CHECKBOX
+// ===================================================================
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAllCheckbox = document.getElementById('selectAll');
+    const customerCheckboxes = document.querySelectorAll('.customer-checkbox');
+    const deleteButton = document.getElementById('deleteSelected');
     
-    rows.forEach(row => {
-        if (filterValue === '') {
-            row.style.display = '';
-        } else {
-            // Perhatikan indeks kolom sekarang berubah. Status ada di kolom pertama (index 0).
-            const statusCell = row.querySelector('td:first-child span');
-            const status = statusCell.textContent.trim().toLowerCase();
-            row.style.display = status === filterValue ? '' : 'none';
+    // Select all functionality
+    selectAllCheckbox.addEventListener('change', function() {
+        const isChecked = this.checked;
+        
+        customerCheckboxes.forEach(checkbox => {
+            checkbox.checked = isChecked;
+        });
+        
+        updateDeleteButton();
+    });
+    
+    // Individual checkbox functionality
+    customerCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            updateSelectAllCheckbox();
+            updateDeleteButton();
+        });
+    });
+    
+    // Update select all checkbox state
+    function updateSelectAllCheckbox() {
+        const checkedCheckboxes = Array.from(customerCheckboxes).filter(cb => cb.checked);
+        
+        selectAllCheckbox.checked = customerCheckboxes.length > 0 && customerCheckboxes.length === checkedCheckboxes.length;
+        selectAllCheckbox.indeterminate = checkedCheckboxes.length > 0 && checkedCheckboxes.length < customerCheckboxes.length;
+    }
+    
+    // Update delete button state
+    function updateDeleteButton() {
+        const checkedCheckboxes = Array.from(customerCheckboxes).filter(cb => cb.checked);
+        deleteButton.disabled = checkedCheckboxes.length === 0;
+    }
+    
+    // Delete selected functionality
+    deleteButton.addEventListener('click', function() {
+        const checkedCheckboxes = Array.from(customerCheckboxes).filter(cb => cb.checked);
+        const count = checkedCheckboxes.length;
+        
+        if (count > 0) {
+            document.getElementById('deleteCount').textContent = count;
+            showDeleteModal();
         }
     });
 });
 
+// ===================================================================
+// FUNGSI MODAL
+// ===================================================================
 function showRestoreModal() {
     document.getElementById('restoreModal').classList.remove('hidden');
 }
@@ -201,4 +332,67 @@ function showRestoreModal() {
 function hideRestoreModal() {
     document.getElementById('restoreModal').classList.add('hidden');
 }
+
+function showDeleteModal() {
+    document.getElementById('deleteModal').classList.remove('hidden');
+}
+
+function hideDeleteModal() {
+    document.getElementById('deleteModal').classList.add('hidden');
+}
+
+// ===================================================================
+// EVENT LISTENER DELETE
+// ===================================================================
+document.addEventListener('DOMContentLoaded', function() {
+    const confirmDeleteButton = document.getElementById('confirmDelete');
+    
+    confirmDeleteButton.addEventListener('click', async function() {
+        const checkedCheckboxes = Array.from(document.querySelectorAll('.customer-checkbox')).filter(cb => cb.checked);
+        const ids = checkedCheckboxes.map(cb => cb.dataset.id);
+        
+        if (ids.length === 0) return;
+        
+        this.disabled = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Menghapus...';
+        
+        try {
+            const response = await fetch('/customers/bulk-delete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ ids })
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok && result.success) {
+                // Remove deleted rows from the table
+                checkedCheckboxes.forEach(cb => {
+                    const row = cb.closest('tr');
+                    row.style.transition = 'opacity 0.3s';
+                    row.style.opacity = '0';
+                    setTimeout(() => row.remove(), 300);
+                });
+                
+                showToast(`Berhasil menghapus ${ids.length} pelanggan`, 'success');
+                hideDeleteModal();
+                
+                // Update select all checkbox state
+                document.getElementById('selectAll').checked = false;
+                document.getElementById('selectAll').indeterminate = false;
+                document.getElementById('deleteSelected').disabled = true;
+            } else {
+                showToast(result.message || 'Gagal menghapus pelanggan', 'error');
+            }
+        } catch (error) {
+            console.error('Delete Error:', error);
+            showToast('Terjadi kesalahan saat menghapus pelanggan', 'error');
+        } finally {
+            this.disabled = false;
+            this.innerHTML = 'Hapus';
+        }
+    });
+});
 </script>

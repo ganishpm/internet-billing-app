@@ -20,10 +20,23 @@ const SettingSchema = new mongoose.Schema({
     kirimiUserCode: { type: String, default: '' }, // <-- TAMBAHKAN INI
     kirimiSecretKey: { type: String, default: '' }, // <-- TAMBAHKAN INI
     kirimiDeviceId: { type: String, default: '' },
+    // --- Weagete ---
+    weagateToken: String,
     // --- Template Pesan ---
     waTemplate: { type: String, default: '...' },
     paymentConfirmationTemplate: { type: String, default: '...' },
-    invoiceGenerationTemplate: { type: String, default: '...' }
+    invoiceGenerationTemplate: { type: String, default: '...' },
+    // --- Limit dan Jeda Pesan ---
+    limitPesan: {
+        type: Number,
+        default: 10, // Default 10 pesan per broadcast
+        min: 1
+    },
+    jedaWaktu: {
+        type: Number,
+        default: 60, // Default 60 detik (1 menit)
+        min: 1
+    }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Setting', SettingSchema);
