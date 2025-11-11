@@ -70,3 +70,9 @@ sudo node scripts/createAdmin.js
 ```
 npm start
 ```
+## Bisa berikan kopi kesini ya... terimakasihh
+
+![WhatsApp Image 2025-11-11 at 19 27 19](https://github.com/user-attachments/assets/e9beba49-e772-4bc7-8fa5-d900d8573cdb)
+
+## kontak me
+💬 | Chat lasambdo@gmail.com
